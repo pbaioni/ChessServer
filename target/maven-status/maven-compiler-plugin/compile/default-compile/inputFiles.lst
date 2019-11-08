@@ -1,0 +1,15 @@
+/Users/paolobaioni/git/ChessServer/src/main/java/app/commands/properties/CommandProperties.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/main/Application.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/persistence/model/UserDo.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/web/controllers/UserController.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/commands/controller/CommandController.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/persistence/exceptions/EntityNotFoundException.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/persistence/properties/UsersProperties.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/web/controllers/BoardController.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/persistence/exceptions/EntityIdMismatchException.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/web/api/model/User.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/main/service/BoardService.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/persistence/repo/UserRepository.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/main/properties/ApplicationProperties.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/persistence/services/UserService.java
+/Users/paolobaioni/git/ChessServer/src/main/java/app/main/LaunchApplication.java

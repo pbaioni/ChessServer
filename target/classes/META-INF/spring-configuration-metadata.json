@@ -1,0 +1,43 @@
+{
+  "groups": [
+    {
+      "name": "application",
+      "type": "app.main.properties.ApplicationProperties",
+      "sourceType": "app.main.properties.ApplicationProperties"
+    },
+    {
+      "name": "command",
+      "type": "app.commands.properties.CommandProperties",
+      "sourceType": "app.commands.properties.CommandProperties"
+    },
+    {
+      "name": "user",
+      "type": "app.persistence.properties.UsersProperties",
+      "sourceType": "app.persistence.properties.UsersProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "application.app-property",
+      "type": "java.lang.String",
+      "sourceType": "app.main.properties.ApplicationProperties"
+    },
+    {
+      "name": "command.start",
+      "type": "java.lang.Boolean",
+      "sourceType": "app.commands.properties.CommandProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "user.property1",
+      "type": "java.lang.String",
+      "sourceType": "app.persistence.properties.UsersProperties"
+    },
+    {
+      "name": "user.property2",
+      "type": "java.lang.String",
+      "sourceType": "app.persistence.properties.UsersProperties"
+    }
+  ],
+  "hints": []
+}
