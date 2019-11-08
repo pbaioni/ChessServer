@@ -8,32 +8,31 @@ public class BoardHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BoardHelper.class);
 	
 	public static String cleanPiecesFromFen(String fenWithPieces) {
-		String[] splitFen = fenWithPieces.split("/");
 		String separator = "/";
-		String cleanRows = "";
+		String[] splitFen = fenWithPieces.split(separator);
+		String rowsWithoutPieces = "";
 		for (int i = 0; i < 8; i++) {
-			String fenRowToProcess;
+			String fenRowWithoutNumbers;
 			if (i == 7) {
-				fenRowToProcess = replaceNumbers(splitFen[i].split(" ")[0]);
+				fenRowWithoutNumbers = replaceNumbers(splitFen[i].split(" ")[0]);
 				separator = "";
 			} else {
-				fenRowToProcess = replaceNumbers(splitFen[i]);
+				fenRowWithoutNumbers = replaceNumbers(splitFen[i]);
 			}
-
-			String cleanFenRow = "";
-			for (int j = 0; j < fenRowToProcess.length(); j++) {
-				if (!fenRowToProcess.substring(j, j + 1).equals("p")
-						&& !fenRowToProcess.substring(j, j + 1).equals("P")) {
-					cleanFenRow += " ";
+			String fenRowWithoutPieces = "";
+			for (int j = 0; j < fenRowWithoutNumbers.length(); j++) {
+				if (!fenRowWithoutNumbers.substring(j, j + 1).equals("p")
+						&& !fenRowWithoutNumbers.substring(j, j + 1).equals("P")) {
+					fenRowWithoutPieces += " ";
 				} else {
-					cleanFenRow += fenRowToProcess.substring(j, j + 1);
+					fenRowWithoutPieces += fenRowWithoutNumbers.substring(j, j + 1);
 				}
 			}
-			cleanFenRow = replaceBlanks(cleanFenRow);
-			cleanRows += cleanFenRow + separator;
+			fenRowWithoutPieces = replaceBlanks(fenRowWithoutPieces);
+			rowsWithoutPieces += fenRowWithoutPieces + separator;
 		}
 		
-		return (cleanRows + getAdditionalInfos(fenWithPieces)).trim();
+		return (rowsWithoutPieces + getAdditionalInfos(fenWithPieces)).trim();
 	}
 
 	private static String replaceNumbers(String fenRowWithNumbers) {
