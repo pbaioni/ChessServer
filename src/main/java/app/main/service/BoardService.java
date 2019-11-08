@@ -2,69 +2,48 @@ package app.main.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import app.main.service.helper.BoardHelper;
+import app.web.api.model.SimpleResponseWrapper;
 
 @Service
 public class BoardService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BoardService.class);
+	
+    @Autowired
+    ObjectMapper mapper;
 
-	public String getOnlyPawnsFEN(String fen) {
-		LOGGER.info("cleaninf fen: " + fen);
-		String[] splitFen = fen.split("/");
-		String separator = "/";
-		String cleanRows = "";
-		for (int i = 0; i < 8; i++) {
-			String fenRowToProcess;
-			if (i == 7) {
-				fenRowToProcess = replaceNumbers(splitFen[i].split(" ")[0]);
-				separator = "";
-			} else {
-				fenRowToProcess = replaceNumbers(splitFen[i]);
-			}
-
-			LOGGER.info("fen raw row: " + fenRowToProcess);
-			String cleanFenRow = "";
-			for (int j = 0; j < fenRowToProcess.length(); j++) {
-				if (!fenRowToProcess.substring(j, j + 1).equals("p")
-						&& !fenRowToProcess.substring(j, j + 1).equals("P")) {
-					cleanFenRow += " ";
-				} else {
-					cleanFenRow += fenRowToProcess.substring(j, j + 1);
-				}
-			}
-			cleanFenRow = replaceBlanks(cleanFenRow);
-			cleanRows += cleanFenRow + separator;
+	public String getOnlyPawnsFen(String fen) {
+		LOGGER.info("Cleaning pieces from fen: " + fen);
+    	String jsonWrapper = "";
+    	try {
+    		jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(BoardHelper.cleanPiecesFromFen(fen)));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
 		}
-		return "{\"fenOnlyPawns\": \"" + cleanRows + " w KQkq - 0 1\"}";
+    	LOGGER.info("Only pawns fen wrapper: " + jsonWrapper);
+    	return jsonWrapper;
 	}
-
-	private String replaceNumbers(String fenRowWithNumbers) {
-
-		fenRowWithNumbers = fenRowWithNumbers.replace("1", " ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("2", "  ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("3", "   ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("4", "    ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("5", "     ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("6", "      ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("7", "       ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("8", "        ");
-
-		return fenRowWithNumbers;
+	
+	public String welcome() {
+		String ready = "Board service is ready to be used";
+		LOGGER.info("Welcome message: " + ready);
+    	String jsonWrapper = "";
+    	try {
+    		jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(ready));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+    	LOGGER.info("Welcome wrapper: " + jsonWrapper);
+    	return jsonWrapper;
 	}
+	
 
-	private String replaceBlanks(String fenRowWithBlanks) {
-
-		fenRowWithBlanks = fenRowWithBlanks.replace("        ", "8");
-		fenRowWithBlanks = fenRowWithBlanks.replace("       ", "7");
-		fenRowWithBlanks = fenRowWithBlanks.replace("      ", "6");
-		fenRowWithBlanks = fenRowWithBlanks.replace("     ", "5");
-		fenRowWithBlanks = fenRowWithBlanks.replace("    ", "4");
-		fenRowWithBlanks = fenRowWithBlanks.replace("   ", "3");
-		fenRowWithBlanks = fenRowWithBlanks.replace("  ", "2");
-		fenRowWithBlanks = fenRowWithBlanks.replace(" ", "1");
-
-		return fenRowWithBlanks;
-	}
 
 }

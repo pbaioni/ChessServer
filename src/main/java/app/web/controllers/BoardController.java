@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.main.service.BoardService;
-import app.web.api.model.StringResponse;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -18,21 +17,16 @@ public class BoardController {
 
     @Autowired
     private BoardService boardService;
+
     
     @GetMapping
     public String welcome() {
-        return "{\"content\":\"Board service is ready to be used\"}";
+        return boardService.welcome();
     }
 
     @PostMapping("/onlypawns")
     public String getOnlyPawns(@RequestBody String fen) {
-
-    	System.out.println("Receiving get only pawns body; " + fen);
-    	String responseToReturn = boardService.getOnlyPawnsFEN(fen);
-    	StringResponse response = new StringResponse(responseToReturn);
-
-        return responseToReturn;
-
+    	return boardService.getOnlyPawnsFen(fen);
     }
 	
 }
