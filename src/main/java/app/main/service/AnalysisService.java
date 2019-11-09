@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
 import app.persistence.repo.AnalysisRepository;
+import app.stockfish.engine.EngineEvaluation;
 import app.stockfish.service.StockfishService;
 import app.web.api.model.SimpleResponseWrapper;
 
@@ -68,14 +69,9 @@ public class AnalysisService {
 		}else {
 			LOGGER.info("No result from database, computing analysis for fen: " + fen);
 			analysis = new AnalysisDo(fen);
-			String eval = stockfishService.getEvaluation(fen);
-			analysis.setEvaluation(eval);
-//			try {
-//				Thread.sleep(2000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(fen);
+			analysis.setEvaluation(engineEvaluation.getEvaluation());
+			analysis.setBestMove(engineEvaluation.getBestMove());
 			analysisRepository.save(analysis);
 			LOGGER.info("New analysis saved: " + analysis.toString());
 		}

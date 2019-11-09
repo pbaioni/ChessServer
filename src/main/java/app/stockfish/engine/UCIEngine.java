@@ -38,6 +38,7 @@ abstract class UCIEngine {
 
     void sendCommand(String command) {
         try {
+        	System.out.println("Sending command: " + command);
             output.write(command + "\n");
             output.flush();
         } catch (IOException e) {

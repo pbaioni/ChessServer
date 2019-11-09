@@ -24,6 +24,9 @@ public class AnalysisDo {
 	@Column
 	private String evaluation;
 	
+	@Column
+	private String bestMove;
+	
 	public AnalysisDo() {
 		//NOTHING TO DO
 	}
@@ -32,7 +35,8 @@ public class AnalysisDo {
 		this.shortFen = FenHelper.getShortFen(fen);
 		this.fen = fen;
 		this.onlyPawnsFen = FenHelper.cleanPiecesFromFen(fen);
-		this.evaluation = "0,2";
+		this.evaluation = "-,--";
+		this.bestMove = "----";
 	}
 	
 	public String getShortFen() {
@@ -65,6 +69,14 @@ public class AnalysisDo {
 
 	public void setEvaluation(String evaluation) {
 		this.evaluation = evaluation;
+	}
+
+	public String getBestMove() {
+		return bestMove;
+	}
+
+	public void setBestMove(String bestMove) {
+		this.bestMove = bestMove;
 	}
 
 	@Override

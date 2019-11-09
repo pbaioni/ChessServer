@@ -38,20 +38,14 @@ public class StockfishClient {
 			String output;
 
 			switch (query.getType()) {
-			case Evaluation:
-				output = engine.getEvaluation(query);
-				break;
-			case Best_Move:
-				output = engine.getBestMove(query);
+			case EngineEvaluation:
+				output = engine.getEngineEvaluation(query);
 				break;
 			case Make_Move:
 				output = engine.makeMove(query);
 				break;
 			case Legal_Moves:
 				output = engine.getLegalMoves(query);
-				break;
-			case Checkers:
-				output = engine.getCheckers(query);
 				break;
 			default:
 				output = null;
