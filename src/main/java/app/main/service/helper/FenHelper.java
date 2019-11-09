@@ -17,8 +17,10 @@ public class FenHelper {
 		String rowsWithoutPieces = "";
 		for (int i = 0; i < 8; i++) {
 			String fenRowWithoutNumbers;
+			String endOfRow = ROW_SEPARATOR;
 			if (i == 7) {
-				fenRowWithoutNumbers = replaceNumbers(splitFen[i].split(" ")[0]);
+				fenRowWithoutNumbers = replaceNumbers(splitFen[i].split(FEN_SEPARATOR)[0]);
+				endOfRow = "";
 			} else {
 				fenRowWithoutNumbers = replaceNumbers(splitFen[i]);
 			}
@@ -32,49 +34,12 @@ public class FenHelper {
 				}
 			}
 			fenRowWithoutPieces = replaceBlanks(fenRowWithoutPieces);
-			rowsWithoutPieces += fenRowWithoutPieces + FEN_SEPARATOR;
+			rowsWithoutPieces += fenRowWithoutPieces + endOfRow;
 		}
 		
 		return (rowsWithoutPieces + getAdditionalInfos(fenWithPieces)).trim();
 	}
-
-	private static String replaceNumbers(String fenRowWithNumbers) {
-
-		fenRowWithNumbers = fenRowWithNumbers.replace("1", " ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("2", "  ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("3", "   ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("4", "    ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("5", "     ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("6", "      ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("7", "       ");
-		fenRowWithNumbers = fenRowWithNumbers.replace("8", "        ");
-
-		return fenRowWithNumbers;
-	}
-
-	private static String replaceBlanks(String fenRowWithBlanks) {
-
-		fenRowWithBlanks = fenRowWithBlanks.replace("        ", "8");
-		fenRowWithBlanks = fenRowWithBlanks.replace("       ", "7");
-		fenRowWithBlanks = fenRowWithBlanks.replace("      ", "6");
-		fenRowWithBlanks = fenRowWithBlanks.replace("     ", "5");
-		fenRowWithBlanks = fenRowWithBlanks.replace("    ", "4");
-		fenRowWithBlanks = fenRowWithBlanks.replace("   ", "3");
-		fenRowWithBlanks = fenRowWithBlanks.replace("  ", "2");
-		fenRowWithBlanks = fenRowWithBlanks.replace(" ", "1");
-
-		return fenRowWithBlanks;
-	}
 	
-	private static String getAdditionalInfos(String fen) {
-		String[] splitFen = fen.split(" ");
-		String additionalInfos = " ";
-		for (int i = 1; i < splitFen.length; i++) {
-			additionalInfos += splitFen[i] + " ";
-		}
-		
-		return additionalInfos;
-	}
 
 	public static String getShortFen(String fen) {
 		
@@ -85,6 +50,48 @@ public class FenHelper {
 		}
 		
 		return shortFen.trim();
+	}
+
+	
+	private static String replaceNumbers(String fenRowWithNumbers) {
+
+		String fenRowWithoutNumbers = fenRowWithNumbers;
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("1", " ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("2", "  ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("3", "   ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("4", "    ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("5", "     ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("6", "      ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("7", "       ");
+		fenRowWithoutNumbers = fenRowWithoutNumbers.replace("8", "        ");
+
+		return fenRowWithoutNumbers;
+	}
+
+	private static String replaceBlanks(String fenRowWithBlanks) {
+
+		String fenRowWithoutBlanks = fenRowWithBlanks;
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("        ", "8");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("       ", "7");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("      ", "6");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("     ", "5");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("    ", "4");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("   ", "3");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace("  ", "2");
+		fenRowWithoutBlanks = fenRowWithoutBlanks.replace(" ", "1");
+
+		return fenRowWithoutBlanks;
+	}
+	
+	private static String getAdditionalInfos(String fen) {
+		
+		String[] splitFen = fen.split(" ");
+		String additionalInfos = " ";
+		for (int i = 1; i < splitFen.length; i++) {
+			additionalInfos += splitFen[i] + " ";
+		}
+		
+		return additionalInfos;
 	}
 	
 }
