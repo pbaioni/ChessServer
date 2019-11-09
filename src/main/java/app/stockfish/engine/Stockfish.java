@@ -21,6 +21,7 @@ public class Stockfish extends UCIEngine {
 	}
 
 	public String getEngineEvaluation(Query query) {
+
 		String evaluation = "";
 		String bestMove = "";
 		String separator = " ";
@@ -42,9 +43,9 @@ public class Stockfish extends UCIEngine {
 		evaluation = response.get(response.size() - 2).split("score cp")[1].trim().split(" ")[0];
 		bestMove = response.get(response.size() - 1).substring(9).split("\\s+")[0];
 
-	String absoluteEvaluation = calculateAbsoluteEvaluation(FenHelper.getTurn(query.getFen()), evaluation);
-	String rval = (absoluteEvaluation + separator + bestMove)
-			.trim();System.out.println("Engine evaluation: "+rval);return rval;
+		String absoluteEvaluation = calculateAbsoluteEvaluation(FenHelper.getTurn(query.getFen()), evaluation);
+		String rval = (absoluteEvaluation + separator + bestMove).trim();
+		return rval;
 	}
 
 	public String getLegalMoves(Query query) {
