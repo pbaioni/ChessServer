@@ -42,10 +42,7 @@ public class Application implements ApplicationRunner, DisposableBean{
 
 		//printing users DB content
 		LOGGER.info("DB content: " + userService.getAllUsers().toString());
-
-		
 		LOGGER.info("Application started");
-
 		
 	}
 	
