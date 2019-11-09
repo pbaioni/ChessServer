@@ -1,5 +1,6 @@
 package app.stockfish;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
@@ -55,6 +56,23 @@ public class StockfishClient {
 			callback.submit(() -> result.accept(output));
 			engines.add(engine);
 		});
+	}
+	
+	public void stop() {
+		int count = 1;
+		for(Stockfish s : engines) {
+			try {
+				System.out.println("Stopping Stockfish engine #" + count);
+				s.close();
+				count++;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		executor.shutdownNow();
+		callback.shutdownNow();
+		
 	}
 
 	public static class Builder {

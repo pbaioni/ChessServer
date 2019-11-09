@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
 
 import app.main.properties.ApplicationProperties;
+import app.main.service.AnalysisService;
 import app.persistence.services.UserService;
 
 @Service
@@ -21,6 +22,9 @@ public class Application implements ApplicationRunner, DisposableBean{
 	
 	@Autowired
 	UserService userService;
+	
+	@Autowired
+	AnalysisService analysisService;
 	
 	
 	public void init() {
@@ -47,6 +51,7 @@ public class Application implements ApplicationRunner, DisposableBean{
 	
 	public void stop() {
 		LOGGER.info("Stopping Application");
+		analysisService.stop();
 		LOGGER.info("Application stopped");
 	}
 

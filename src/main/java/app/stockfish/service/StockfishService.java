@@ -83,4 +83,10 @@ public class StockfishService {
 		
 		return atomicRval.get();
 	}
+
+
+	public void stop() {
+		client.stop();
+		
+	}
 }

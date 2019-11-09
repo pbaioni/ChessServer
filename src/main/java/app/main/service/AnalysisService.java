@@ -90,6 +90,10 @@ public class AnalysisService {
 
 	}
 
+	public void stop() {
+		stockfishService.stop();
+	}
+
 	
 
 
