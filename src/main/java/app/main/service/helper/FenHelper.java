@@ -3,19 +3,22 @@ package app.main.service.helper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BoardHelper {
+public class FenHelper {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BoardHelper.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FenHelper.class);
+	
+	private static final String ROW_SEPARATOR = "/";
+	
+	private static final String FEN_SEPARATOR = " ";
 	
 	public static String cleanPiecesFromFen(String fenWithPieces) {
-		String separator = "/";
-		String[] splitFen = fenWithPieces.split(separator);
+
+		String[] splitFen = fenWithPieces.split(ROW_SEPARATOR);
 		String rowsWithoutPieces = "";
 		for (int i = 0; i < 8; i++) {
 			String fenRowWithoutNumbers;
 			if (i == 7) {
 				fenRowWithoutNumbers = replaceNumbers(splitFen[i].split(" ")[0]);
-				separator = "";
 			} else {
 				fenRowWithoutNumbers = replaceNumbers(splitFen[i]);
 			}
@@ -29,7 +32,7 @@ public class BoardHelper {
 				}
 			}
 			fenRowWithoutPieces = replaceBlanks(fenRowWithoutPieces);
-			rowsWithoutPieces += fenRowWithoutPieces + separator;
+			rowsWithoutPieces += fenRowWithoutPieces + FEN_SEPARATOR;
 		}
 		
 		return (rowsWithoutPieces + getAdditionalInfos(fenWithPieces)).trim();
@@ -71,6 +74,17 @@ public class BoardHelper {
 		}
 		
 		return additionalInfos;
+	}
+
+	public static String getShortFen(String fen) {
+		
+		String[] splitFen = fen.split(FEN_SEPARATOR);
+		String shortFen = "";
+		for (int i = 0; i < splitFen.length-2; i++) {
+			shortFen += splitFen[i] + FEN_SEPARATOR;
+		}
+		
+		return shortFen.trim();
 	}
 	
 }

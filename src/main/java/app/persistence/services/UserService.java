@@ -35,7 +35,7 @@ public class UserService {
 		repository.save(clemence);
 		repository.save(superFan);
 		
-		LOGGER.info("Database filled");
+		LOGGER.info("User database filled");
 	}
 
 	public Iterable<UserDo> getAllUsers() {

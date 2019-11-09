@@ -8,25 +8,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.main.service.BoardService;
+import app.main.service.AnalysisService;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/board")
-public class BoardController {
+public class AnalysisController {
 
     @Autowired
-    private BoardService boardService;
+    private AnalysisService analysisService;
 
     
     @GetMapping
     public String welcome() {
-        return boardService.welcome();
+        return analysisService.welcome();
     }
 
     @PostMapping("/onlypawns")
     public String getOnlyPawns(@RequestBody String fen) {
-    	return boardService.getOnlyPawnsFen(fen);
+    	return analysisService.getOnlyPawnsFen(fen);
+    }
+    
+    @PostMapping("/analysis")
+    public String getAnalysis(@RequestBody String fen) {
+    	return analysisService.getAnalysis(fen);
     }
 	
 }
