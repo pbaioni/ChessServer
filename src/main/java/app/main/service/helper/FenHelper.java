@@ -51,6 +51,12 @@ public class FenHelper {
 		
 		return shortFen.trim();
 	}
+	
+	public static String getTurn(String fen) {
+		
+		return fen.split(FEN_SEPARATOR)[1];
+		
+	}
 
 	
 	private static String replaceNumbers(String fenRowWithNumbers) {

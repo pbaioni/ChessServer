@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
 import app.persistence.repo.AnalysisRepository;
+import app.stockfish.service.StockfishService;
 import app.web.api.model.SimpleResponseWrapper;
 
 @Service
@@ -24,6 +25,9 @@ public class AnalysisService {
 	
 	@Autowired
 	AnalysisRepository analysisRepository;
+	
+	@Autowired
+	StockfishService stockfishService;
 	
     @Autowired
     ObjectMapper mapper;
@@ -54,7 +58,6 @@ public class AnalysisService {
 	}
 	
 	public String getAnalysis(String fen) {
-		
 		Optional<AnalysisDo> databaseAnalysis;
 		AnalysisDo analysis;
 		LOGGER.info("Searching for analysis in DB");
@@ -65,10 +68,20 @@ public class AnalysisService {
 		}else {
 			LOGGER.info("No result from database, computing analysis for fen: " + fen);
 			analysis = new AnalysisDo(fen);
+			String eval = stockfishService.getEvaluation(fen);
+			analysis.setEvaluation(eval);
+//			try {
+//				Thread.sleep(2000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			analysisRepository.save(analysis);
 			LOGGER.info("New analysis saved: " + analysis.toString());
 		}
 
+		
+		
 		//returning analysis as json string
     	String jsonWrapper = "";
     	try {
