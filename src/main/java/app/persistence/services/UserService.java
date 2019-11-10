@@ -19,7 +19,7 @@ public class UserService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 		
 	@Autowired
-	UserRepository repository;
+	UserRepository userRepository;
 	
 	@Autowired
 	UsersProperties properties;
@@ -31,36 +31,36 @@ public class UserService {
 		UserDo paolo = new UserDo("Paolo", "pistache", now);
 		UserDo clemence = new UserDo("Clemence", "pommepoire", now);
 		UserDo superFan = new UserDo("superFan", "LoveYou", now);
-		repository.save(paolo);
-		repository.save(clemence);
-		repository.save(superFan);
+		userRepository.save(paolo);
+		userRepository.save(clemence);
+		userRepository.save(superFan);
 		
 		LOGGER.info("User database filled");
 	}
 
 	public Iterable<UserDo> getAllUsers() {
-		return repository.findAll();
+		return userRepository.findAll();
 	}
 
 	public UserDo getUser(String userName) {
-		return repository.findByUserName(userName);
+		return userRepository.findByUserName(userName);
 	}
 
 	public UserDo createUser(User user) {
-		return repository.save(new UserDo(user));
+		return userRepository.save(new UserDo(user));
 	}
 
 	public UserDo updateUser(User user) {
-		UserDo userToUpdate = repository.findById(user.getUserName()).orElseThrow(EntityNotFoundException::new);
+		UserDo userToUpdate = userRepository.findById(user.getUserName()).orElseThrow(EntityNotFoundException::new);
 		userToUpdate.setPassword(user.getPassword());
 		userToUpdate.setLastLogin(user.getLastLogin());
-		return repository.save(userToUpdate);
+		return userRepository.save(userToUpdate);
 	}
 
 	public void deleteUser(String userName) {
-      UserDo userToDelete = repository.findById(userName)
+      UserDo userToDelete = userRepository.findById(userName)
       .orElseThrow(EntityNotFoundException::new);
-    repository.delete(userToDelete);
+    userRepository.delete(userToDelete);
 		
 	}
 	

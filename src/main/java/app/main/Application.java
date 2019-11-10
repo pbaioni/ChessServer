@@ -18,7 +18,7 @@ public class Application implements ApplicationRunner, DisposableBean{
 	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 	
 	@Autowired
-	ApplicationProperties properties;
+	ApplicationProperties applicationProperties;
 	
 	@Autowired
 	UserService userService;
@@ -29,7 +29,7 @@ public class Application implements ApplicationRunner, DisposableBean{
 	
 	public void init() {
 		//app property example
-		LOGGER.info("App property: " + properties.getAppProperty());
+		LOGGER.info("Application property example: " + applicationProperties.getAppProperty());
 
 		//initializing services
 		userService.fillDB();
