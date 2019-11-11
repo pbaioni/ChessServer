@@ -32,6 +32,10 @@ public class AnalysisService {
 	
     @Autowired
     ObjectMapper mapper;
+    
+    public void init() {
+    	stockfishService.init();
+    }
 
 	public String welcome() {
 		String ready = "Board service is ready";
@@ -76,8 +80,6 @@ public class AnalysisService {
 			LOGGER.info("New analysis saved: " + analysis.toString());
 		}
 
-		
-		
 		//returning analysis as json string
     	String jsonWrapper = "";
     	try {

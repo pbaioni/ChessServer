@@ -33,6 +33,7 @@ public class Application implements ApplicationRunner, DisposableBean{
 
 		//initializing services
 		userService.fillDB();
+		analysisService.init();
 		
 		LOGGER.info("Application initialized");
 		

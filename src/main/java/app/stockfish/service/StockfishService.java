@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import app.stockfish.StockfishClient;
@@ -18,38 +19,35 @@ import app.stockfish.engine.enums.Query;
 import app.stockfish.engine.enums.QueryType;
 import app.stockfish.engine.enums.Variant;
 import app.stockfish.exceptions.StockfishInitException;
+import app.stockfish.properties.StockfishProperties;
 
 @Service
 public class StockfishService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(StockfishService.class);
+
+	@Autowired
+	StockfishProperties stockfishProperties;
 	
 	private StockfishClient client;
 	
-	private int stockfishThreads = 3;
-	
-	private int stockfishInstances = 3;
-	
-	private int depth = 25;
-	
-	private int skills = 20;
-	
-	private String enginePath = "src/main/resources/stockfish/";
+	private int depth;
 	
 	public StockfishService() {
-		init();
+
 	}
 
 	
 	public void init() {
         try {
 			client = new StockfishClient.Builder()
-					.setPath(enginePath)
-			        .setInstances(stockfishInstances)
-			        .setOption(Option.Threads, stockfishThreads)
-			        .setOption(Option.Skill_Level, skills)
+					.setPath(stockfishProperties.getEnginePath())
+			        .setInstances(stockfishProperties.getInstances())
+			        .setOption(Option.Threads, stockfishProperties.getThreads())
+			        .setOption(Option.Skill_Level, stockfishProperties.getSkills())
 			        .setVariant(Variant.DEFAULT)
 			        .build();
+			this.depth = stockfishProperties.getDepth();
 		} catch (StockfishInitException e) {
 			LOGGER.error("Problem while creating stockfish client", e);
 		}
