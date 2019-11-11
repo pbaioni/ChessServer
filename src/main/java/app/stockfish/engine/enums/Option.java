@@ -12,7 +12,9 @@ public enum Option {
     Move_Overhead("Move Overhead"),
     Minimum_Thinking_Time("Minimum Thinking Time"),
     Slow_Mover("Slow Mover"),
-    Nodestime("nodestime");
+    Nodestime("nodestime"),
+    OwnBook("OwnBook"),
+    AnalyseMode("UCI_AnalyseMode");
 
     private String optionString;
     private long value;

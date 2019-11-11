@@ -26,6 +26,8 @@ public class Stockfish extends UCIEngine {
 		String bestMove = "";
 		String separator = " ";
 		waitForReady();
+		sendCommand("ucinewgame");
+		waitForReady();
 		sendCommand("position fen " + query.getFen());
 
 		StringBuilder command = new StringBuilder("go ");

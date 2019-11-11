@@ -19,6 +19,10 @@ public class StockfishProperties {
 	
 	private String enginePath;
 	
+	private int hash;
+	
+	private int multipv;
+	
 	public StockfishProperties() {
 		
 	}
@@ -63,10 +67,26 @@ public class StockfishProperties {
 		this.enginePath = enginePath;
 	}
 
+	public int getHash() {
+		return hash;
+	}
+
+	public void setHash(int hash) {
+		this.hash = hash;
+	}
+
+	public int getMultipv() {
+		return multipv;
+	}
+
+	public void setMultipv(int multipv) {
+		this.multipv = multipv;
+	}
+
 	@Override
 	public String toString() {
 		return "StockfishProperties [instances=" + instances + ", threads=" + threads + ", depth=" + depth + ", skills="
-				+ skills + ", enginePath=" + enginePath + "]";
+				+ skills + ", enginePath=" + enginePath + ", hash=" + hash + ", multipv=" + multipv + "]";
 	}
 
 }

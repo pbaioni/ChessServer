@@ -45,6 +45,8 @@ public class StockfishService {
 			        .setInstances(stockfishProperties.getInstances())
 			        .setOption(Option.Threads, stockfishProperties.getThreads())
 			        .setOption(Option.Skill_Level, stockfishProperties.getSkills())
+			        .setOption(Option.Hash, stockfishProperties.getHash())
+			        .setOption(Option.MultiPV, stockfishProperties.getMultipv())
 			        .setVariant(Variant.DEFAULT)
 			        .build();
 			this.depth = stockfishProperties.getDepth();
