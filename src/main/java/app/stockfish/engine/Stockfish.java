@@ -83,15 +83,13 @@ public class Stockfish extends UCIEngine {
 	}
 
 	private String calculateAbsoluteEvaluation(String turn, String cpEval) {
-
-		Double doubleEval = Double.parseDouble(cpEval);
+		
+		int intEval = Integer.parseInt(cpEval);
 
 		if (turn.equals("b")) {
-			doubleEval = doubleEval * (-1);
+			intEval = intEval*(-1);
 		}
 
-		doubleEval = doubleEval / 100;
-
-		return Double.toString(doubleEval);
+		return Integer.toString(intEval);
 	}
 }
