@@ -35,8 +35,6 @@ public class AnalysisDo {
 		this.shortFen = FenHelper.getShortFen(fen);
 		this.fen = fen;
 		this.onlyPawnsFen = FenHelper.cleanPiecesFromFen(fen);
-		this.evaluation = "-,--";
-		this.bestMove = "----";
 	}
 	
 	public String getShortFen() {
