@@ -36,8 +36,9 @@ public class FenHelper {
 			fenRowWithoutPieces = replaceBlanks(fenRowWithoutPieces);
 			rowsWithoutPieces += fenRowWithoutPieces + endOfRow;
 		}
-		
-		return (rowsWithoutPieces + getAdditionalInfos(fenWithPieces)).trim();
+		String fenWithoutPieces = (rowsWithoutPieces + getAdditionalInfos(fenWithPieces)).trim();
+		LOGGER.debug("no pieces: " + fenWithoutPieces);
+		return fenWithoutPieces;
 	}
 	
 
