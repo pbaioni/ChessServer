@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import app.main.properties.ApplicationProperties;
 import app.main.service.AnalysisService;
-import app.persistence.services.UserService;
 
 @Service
 public class Application implements ApplicationRunner, DisposableBean{
@@ -21,9 +20,6 @@ public class Application implements ApplicationRunner, DisposableBean{
 	ApplicationProperties applicationProperties;
 	
 	@Autowired
-	UserService userService;
-	
-	@Autowired
 	AnalysisService analysisService;
 	
 	
@@ -32,7 +28,6 @@ public class Application implements ApplicationRunner, DisposableBean{
 		LOGGER.info("Application property example: " + applicationProperties.getAppProperty());
 
 		//initializing services
-		userService.fillDB();
 		analysisService.init();
 		
 		LOGGER.info("Application initialized");
@@ -41,8 +36,6 @@ public class Application implements ApplicationRunner, DisposableBean{
 	
 	public void start() {
 
-		//printing users DB content
-		LOGGER.info("DB content: " + userService.getAllUsers().toString());
 		LOGGER.info("Application started");
 		
 	}
