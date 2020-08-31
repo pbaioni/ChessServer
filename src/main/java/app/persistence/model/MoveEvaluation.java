@@ -2,19 +2,18 @@ package app.persistence.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 @Entity
-@Table(name = "moves")
 public class MoveEvaluation {
 	
 	@Id
-	@Column
-	private String move;
+	@GeneratedValue
+	long id;
 	
 	@Column
-	private String newFen;
+	private String move;
 	
 	@Column
 	private int evaluation;
@@ -24,11 +23,14 @@ public class MoveEvaluation {
 	
 	@Column
 	private int depth;
+	
+	public MoveEvaluation() {
+		
+	}
 
-	public MoveEvaluation(String move, String newFen, int evaluation, int centipawnLoss, int depth) {
+	public MoveEvaluation(String move, int evaluation, int centipawnLoss, int depth) {
 		super();
 		this.move = move;
-		this.newFen = newFen;
 		this.evaluation = evaluation;
 		this.centipawnLoss = centipawnLoss;
 		this.depth = depth;
@@ -40,15 +42,6 @@ public class MoveEvaluation {
 
 	public void setMove(String move) {
 		this.move = move;
-	}
-	
-	
-	public String getNewFen() {
-		return newFen;
-	}
-
-	public void setNewFen(String newFen) {
-		this.newFen = newFen;
 	}
 
 	public int getEvaluation() {
@@ -75,4 +68,10 @@ public class MoveEvaluation {
 		this.depth = depth;
 	}
 
+	@Override
+	public String toString() {
+		return "MoveEvaluation [id=" + id + ", move=" + move + ", evaluation=" + evaluation + ", centipawnLoss="
+				+ centipawnLoss + ", depth=" + depth + "]";
+	}
+	
 }

@@ -4,14 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import app.main.service.helper.FenHelper;
 import app.stockfish.engine.EngineEvaluation;
+import ch.qos.logback.core.pattern.color.BlackCompositeConverter;
 
 @Entity
 @Table(name = "analysis")
@@ -25,13 +30,6 @@ public class AnalysisDo {
 	private String fen;
 
 	@Column
-	private String onlyPawnsFen;
-
-	@Column
-	@ElementCollection
-	private List<MoveEvaluation> moveEvaluations;
-
-	@Column
 	private int evaluation;
 
 	@Column
@@ -43,6 +41,10 @@ public class AnalysisDo {
 	@Column
 	private String comment;
 
+	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+	@CollectionTable(name = "moves", joinColumns = @JoinColumn(name = "move"))
+	private List<MoveEvaluation> moveEvaluations;
+
 	public AnalysisDo() {
 		// NOTHING TO DO
 	}
@@ -50,7 +52,6 @@ public class AnalysisDo {
 	public AnalysisDo(String fen) {
 		this.shortFen = FenHelper.getShortFen(fen);
 		this.fen = fen;
-		this.onlyPawnsFen = FenHelper.cleanPiecesFromFen(fen);
 		moveEvaluations = new ArrayList<MoveEvaluation>();
 	}
 
@@ -68,14 +69,6 @@ public class AnalysisDo {
 
 	public void setFen(String fen) {
 		this.fen = fen;
-	}
-
-	public String getOnlyPawnsFen() {
-		return onlyPawnsFen;
-	}
-
-	public void setOnlyPawnsFen(String onlyPawnsFen) {
-		this.onlyPawnsFen = onlyPawnsFen;
 	}
 
 	public List<MoveEvaluation> getMoveEvaluations() {
@@ -122,6 +115,8 @@ public class AnalysisDo {
 		setEvaluation(engineEvaluation.getEvaluation());
 		setBestMove(engineEvaluation.getBestMove());
 		setDepth(engineEvaluation.getDepth());
+		MoveEvaluation firstEval = new MoveEvaluation(getBestMove(), getEvaluation(), 0, getDepth());
+		moveEvaluations.add(firstEval);
 	}
 
 	public void mergeMove(String move, AnalysisDo analysis) {
@@ -129,9 +124,12 @@ public class AnalysisDo {
 		MoveEvaluation evaluation = getEvaluationByMove(move);
 
 		if (Objects.isNull(evaluation)) {
+			int centipawnLoss = getEvaluation() - analysis.getEvaluation();
+			if (FenHelper.getTurn(getFen()).equals("b")) {
+				centipawnLoss = centipawnLoss * (-1);
+			}
 			// new move case
-			evaluation = new MoveEvaluation(move, analysis.getFen(), getEvaluation(),
-					getEvaluation() - analysis.getEvaluation(), analysis.depth);
+			evaluation = new MoveEvaluation(move, analysis.getEvaluation(), centipawnLoss, analysis.depth);
 			moveEvaluations.add(evaluation);
 		} else {
 			// move update case (better engine depth)
@@ -153,31 +151,41 @@ public class AnalysisDo {
 	}
 
 	private void recalculateBestMove() {
-		//looking for the dest analyzed move
+		// looking for the best analyzed move
 		MoveEvaluation bestEval = moveEvaluations.get(0);
 		for (MoveEvaluation eval : moveEvaluations) {
-			if (eval.getEvaluation() > bestEval.getEvaluation()) {
-				bestEval = eval;
+			if (FenHelper.getTurn(getFen()).equals("b")) {
+				if (eval.getEvaluation() < bestEval.getEvaluation()) {
+					bestEval = eval;
+				}
+			} else {
+				if (eval.getEvaluation() > bestEval.getEvaluation()) {
+					bestEval = eval;
+				}
 			}
 		}
-		
-		//updating analysis properties
+
+		// updating analysis properties
 		setEvaluation(bestEval.getEvaluation());
 		setBestMove(bestEval.getMove());
 		setDepth(bestEval.getDepth());
-		
-		//updating centipawn losses
-		for (MoveEvaluation eval : moveEvaluations) {
-				eval.setCentipawnLoss(bestEval.getEvaluation() - eval.getEvaluation());
+
+		int factor = 1;
+		if (FenHelper.getTurn(getFen()).equals("b")) {
+			factor = -1;
+		}
+		// updating centipawn losses
+		for (
+		MoveEvaluation eval : moveEvaluations) {
+			eval.setCentipawnLoss(factor*bestEval.getEvaluation() - factor*eval.getEvaluation());
 		}
 
 	}
 
 	@Override
 	public String toString() {
-		return "AnalysisDo [shortFen=" + shortFen + ", fen=" + fen + ", onlyPawnsFen=" + onlyPawnsFen
-				+ ", moveEvaluations=" + moveEvaluations + ", evaluation=" + evaluation + ", bestMove=" + bestMove
-				+ ", comment=" + comment + "]";
+		return "AnalysisDo [shortFen=" + shortFen + ", fen=" + fen + ", evaluation=" + evaluation + ", bestMove="
+				+ bestMove + ", depth=" + depth + ", comment=" + comment + ", moveEvaluations=" + moveEvaluations + "]";
 	}
 
 }

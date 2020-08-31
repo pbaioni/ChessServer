@@ -1,8 +1,7 @@
 package app.main.service;
 
+import java.util.Objects;
 import java.util.Optional;
-
-import javax.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
-import app.persistence.model.MoveEvaluation;
 import app.persistence.repo.AnalysisRepository;
 import app.stockfish.engine.EngineEvaluation;
 import app.stockfish.service.StockfishService;
@@ -77,14 +75,22 @@ public class AnalysisService {
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(fen);
 			analysis = new AnalysisDo(fen);
 			analysis.setEngineEvaluation(engineEvaluation);
-			Optional<AnalysisDo> previousDatabaseAnalysis;
-			previousDatabaseAnalysis = analysisRepository.findById(FenHelper.getShortFen(previousFen));
-			if (previousDatabaseAnalysis.isPresent()) {
-				previousDatabaseAnalysis.get().mergeMove(move, analysis);
+			if (Objects.isNull(previousFen) && Objects.isNull(move)) {
+				//start position case, empty database
 				analysisRepository.save(analysis);
-				LOGGER.info("New analysis merged to previous position and saved: " + analysis.toString());
+				LOGGER.info("Start position analysis saved");
+			} else {
+				Optional<AnalysisDo> previousDatabaseAnalysis;
+				previousDatabaseAnalysis = analysisRepository.findById(FenHelper.getShortFen(previousFen));
+				if (previousDatabaseAnalysis.isPresent()) {
+					AnalysisDo previous = previousDatabaseAnalysis.get();
+					previous.mergeMove(move, analysis);
+					analysisRepository.save(previous);
+					analysisRepository.save(analysis);
+					LOGGER.info("New analysis merged to previous position and saved: " + analysis.toString());
+				}
 			}
-			
+
 		}
 
 		// returning analysis as json string
@@ -101,6 +107,10 @@ public class AnalysisService {
 
 	public void stop() {
 		stockfishService.stop();
+	}
+
+	public void dropAll() {
+		analysisRepository.deleteAll();
 	}
 
 }
