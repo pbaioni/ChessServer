@@ -58,7 +58,7 @@ public class StockfishService {
 
 	public EngineEvaluation getEngineEvaluation(String fen) {
 		String stringEngineEvaluation = executeQuery(fen, QueryType.EngineEvaluation);
-		return new EngineEvaluation(stringEngineEvaluation);
+		return new EngineEvaluation(stringEngineEvaluation, depth);
 		
 	}
 	

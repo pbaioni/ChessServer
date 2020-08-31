@@ -32,8 +32,8 @@ public class AnalysisController {
     }
     
     @PostMapping("/analysis")
-    public String getAnalysis(@RequestBody String fen) {
-    	return analysisService.getAnalysis(fen);
+    public String getAnalysis(@RequestBody String previousFen, @RequestBody String move, @RequestBody String fen) {
+    	return analysisService.getAnalysis(previousFen, move, fen);
     }
 	
 }

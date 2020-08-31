@@ -4,25 +4,28 @@ public class EngineEvaluation {
 	
 	private static final String SEPARATOR = " ";
 	
-	private String evaluation;
+	private int evaluation;
 	
 	private String bestMove;
+	
+	private int depth;
 	
 	public EngineEvaluation() {
 		
 	}
 
-	public EngineEvaluation(String stringEvaluation) {
+	public EngineEvaluation(String stringEvaluation, int depth) {
 		String[] splitEval = stringEvaluation.split(SEPARATOR);
-		this.evaluation = splitEval[0].trim();
+		this.evaluation = Integer.parseInt(splitEval[0].trim());
 		this.bestMove = splitEval[1].trim();
+		this.depth = depth;
 	}
 
-	public String getEvaluation() {
+	public int getEvaluation() {
 		return evaluation;
 	}
 
-	public void setEvaluation(String evaluation) {
+	public void setEvaluation(int evaluation) {
 		this.evaluation = evaluation;
 	}
 
@@ -33,5 +36,13 @@ public class EngineEvaluation {
 	public void setBestMove(String bestMove) {
 		this.bestMove = bestMove;
 	}
+
+	public int getDepth() {
+		return depth;
+	}
+
+	public void setDepth(int depth) {
+		this.depth = depth;
+	}	
 
 }
