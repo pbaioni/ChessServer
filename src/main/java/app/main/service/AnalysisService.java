@@ -112,5 +112,13 @@ public class AnalysisService {
 	public void dropAll() {
 		analysisRepository.deleteAll();
 	}
+	
+	public void setFirstEval() {
+		Optional<AnalysisDo> databaseAnalysis = analysisRepository.findById(FenHelper.getShortFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
+		AnalysisDo first = databaseAnalysis.get();
+		first.setEvaluation(20);
+		first.getMoveEvaluations().get(0).setEvaluation(20);
+		analysisRepository.save(first);
+	}
 
 }
