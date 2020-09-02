@@ -43,7 +43,7 @@ public class AnalysisDo {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
 	@CollectionTable(name = "moves", joinColumns = @JoinColumn(name = "move"))
-	private List<MoveEvaluation> moveEvaluations;
+	private List<MoveEvaluationDo> moveEvaluations;
 
 	public AnalysisDo() {
 		// NOTHING TO DO
@@ -52,7 +52,7 @@ public class AnalysisDo {
 	public AnalysisDo(String fen) {
 		this.shortFen = FenHelper.getShortFen(fen);
 		this.fen = fen;
-		moveEvaluations = new ArrayList<MoveEvaluation>();
+		moveEvaluations = new ArrayList<MoveEvaluationDo>();
 	}
 
 	public String getShortFen() {
@@ -71,11 +71,11 @@ public class AnalysisDo {
 		this.fen = fen;
 	}
 
-	public List<MoveEvaluation> getMoveEvaluations() {
+	public List<MoveEvaluationDo> getMoveEvaluations() {
 		return moveEvaluations;
 	}
 
-	public void setMoveEvaluations(List<MoveEvaluation> moveEvaluations) {
+	public void setMoveEvaluations(List<MoveEvaluationDo> moveEvaluations) {
 		this.moveEvaluations = moveEvaluations;
 	}
 
@@ -115,13 +115,13 @@ public class AnalysisDo {
 		setEvaluation(engineEvaluation.getEvaluation());
 		setBestMove(engineEvaluation.getBestMove());
 		setDepth(engineEvaluation.getDepth());
-		MoveEvaluation firstEval = new MoveEvaluation(getBestMove(), getEvaluation(), 0, getDepth());
+		MoveEvaluationDo firstEval = new MoveEvaluationDo(getBestMove(), getEvaluation(), 0, getDepth());
 		moveEvaluations.add(firstEval);
 	}
 
 	public void mergeMove(String move, AnalysisDo analysis) {
 
-		MoveEvaluation evaluation = getEvaluationByMove(move);
+		MoveEvaluationDo evaluation = getEvaluationByMove(move);
 
 		if (Objects.isNull(evaluation)) {
 			int centipawnLoss = getEvaluation() - analysis.getEvaluation();
@@ -129,7 +129,7 @@ public class AnalysisDo {
 				centipawnLoss = centipawnLoss * (-1);
 			}
 			// new move case
-			evaluation = new MoveEvaluation(move, analysis.getEvaluation(), centipawnLoss, analysis.depth);
+			evaluation = new MoveEvaluationDo(move, analysis.getEvaluation(), centipawnLoss, analysis.depth);
 			moveEvaluations.add(evaluation);
 		} else {
 			// move update case (better engine depth)
@@ -140,9 +140,9 @@ public class AnalysisDo {
 		recalculateBestMove();
 	}
 
-	private MoveEvaluation getEvaluationByMove(String move) {
-		MoveEvaluation rval = null;
-		for (MoveEvaluation eval : moveEvaluations) {
+	private MoveEvaluationDo getEvaluationByMove(String move) {
+		MoveEvaluationDo rval = null;
+		for (MoveEvaluationDo eval : moveEvaluations) {
 			if (eval.getMove().equals(move)) {
 				rval = eval;
 			}
@@ -152,8 +152,8 @@ public class AnalysisDo {
 
 	private void recalculateBestMove() {
 		// looking for the best analyzed move
-		MoveEvaluation bestEval = moveEvaluations.get(0);
-		for (MoveEvaluation eval : moveEvaluations) {
+		MoveEvaluationDo bestEval = moveEvaluations.get(0);
+		for (MoveEvaluationDo eval : moveEvaluations) {
 			if (FenHelper.getTurn(getFen()).equals("b")) {
 				if (eval.getEvaluation() < bestEval.getEvaluation()) {
 					bestEval = eval;
@@ -176,7 +176,7 @@ public class AnalysisDo {
 		}
 		// updating centipawn losses
 		for (
-		MoveEvaluation eval : moveEvaluations) {
+		MoveEvaluationDo eval : moveEvaluations) {
 			eval.setCentipawnLoss(factor*bestEval.getEvaluation() - factor*eval.getEvaluation());
 		}
 

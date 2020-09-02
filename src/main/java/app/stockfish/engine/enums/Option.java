@@ -17,13 +17,13 @@ public enum Option {
     AnalyseMode("UCI_AnalyseMode");
 
     private String optionString;
-    private long value;
+    private String value;
 
     Option(String option) {
         optionString = option;
     }
 
-    public Option setValue(long value) {
+    public Option setValue(String value) {
         this.value = value;
         return this;
     }

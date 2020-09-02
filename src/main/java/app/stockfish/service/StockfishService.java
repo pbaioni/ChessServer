@@ -42,14 +42,15 @@ public class StockfishService {
         try {
 			client = new StockfishClient.Builder()
 					.setPath(stockfishProperties.getEnginePath())
-			        .setInstances(stockfishProperties.getInstances())
+			        .setInstances(Integer.parseInt(stockfishProperties.getInstances()))
 			        .setOption(Option.Threads, stockfishProperties.getThreads())
 			        .setOption(Option.Skill_Level, stockfishProperties.getSkills())
 			        .setOption(Option.Hash, stockfishProperties.getHash())
 			        .setOption(Option.MultiPV, stockfishProperties.getMultipv())
+			        .setOption(Option.OwnBook, stockfishProperties.getOwnbook())
 			        .setVariant(Variant.DEFAULT)
 			        .build();
-			this.depth = stockfishProperties.getDepth();
+			this.depth = Integer.parseInt(stockfishProperties.getDepth());
 		} catch (StockfishInitException e) {
 			LOGGER.error("Problem while creating stockfish client", e);
 		}

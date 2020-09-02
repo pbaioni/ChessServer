@@ -9,53 +9,55 @@ import org.springframework.context.annotation.PropertySource;
 @ConfigurationProperties(prefix="stockfish")
 public class StockfishProperties {
 
-	private int instances;
+	private String instances;
 	
-	private int threads;
+	private String threads;
 	
-	private int depth;
+	private String depth;
 	
-	private int skills;
+	private String skills;
 	
 	private String enginePath;
 	
-	private int hash;
+	private String hash;
 	
-	private int multipv;
+	private String multipv;
+	
+	private String ownbook;
 	
 	public StockfishProperties() {
 		
 	}
 
-	public int getInstances() {
+	public String getInstances() {
 		return instances;
 	}
 
-	public void setInstances(int instances) {
+	public void setInstances(String instances) {
 		this.instances = instances;
 	}
 
-	public int getThreads() {
+	public String getThreads() {
 		return threads;
 	}
 
-	public void setThreads(int threads) {
+	public void setThreads(String threads) {
 		this.threads = threads;
 	}
 
-	public int getDepth() {
+	public String getDepth() {
 		return depth;
 	}
 
-	public void setDepth(int depth) {
+	public void setDepth(String depth) {
 		this.depth = depth;
 	}
 
-	public int getSkills() {
+	public String getSkills() {
 		return skills;
 	}
 
-	public void setSkills(int skills) {
+	public void setSkills(String skills) {
 		this.skills = skills;
 	}
 
@@ -67,26 +69,35 @@ public class StockfishProperties {
 		this.enginePath = enginePath;
 	}
 
-	public int getHash() {
+	public String getHash() {
 		return hash;
 	}
 
-	public void setHash(int hash) {
+	public void setHash(String hash) {
 		this.hash = hash;
 	}
 
-	public int getMultipv() {
+	public String getMultipv() {
 		return multipv;
 	}
 
-	public void setMultipv(int multipv) {
+	public void setMultipv(String multipv) {
 		this.multipv = multipv;
+	}
+
+	public String getOwnbook() {
+		return ownbook;
+	}
+
+	public void setOwnbook(String ownbook) {
+		this.ownbook = ownbook;
 	}
 
 	@Override
 	public String toString() {
 		return "StockfishProperties [instances=" + instances + ", threads=" + threads + ", depth=" + depth + ", skills="
-				+ skills + ", enginePath=" + enginePath + ", hash=" + hash + ", multipv=" + multipv + "]";
+				+ skills + ", enginePath=" + enginePath + ", hash=" + hash + ", multipv=" + multipv + ", ownbook="
+				+ ownbook + "]";
 	}
 
 }

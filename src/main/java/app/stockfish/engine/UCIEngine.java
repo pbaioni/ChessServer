@@ -24,7 +24,7 @@ abstract class UCIEngine {
 	final BufferedWriter output;
 	final Process process;
 
-	UCIEngine(String path, Variant variant, Option... options) throws StockfishInitException {
+	UCIEngine(String path, Variant variant, Boolean ownBook, Option... options) throws StockfishInitException {
 
 		try {
 			process = Runtime.getRuntime().exec(getPath(variant, path));

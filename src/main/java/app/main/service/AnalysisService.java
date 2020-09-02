@@ -38,14 +38,12 @@ public class AnalysisService {
 
 	public String welcome() {
 		String ready = "Board service is ready";
-		LOGGER.info("Welcome message: " + ready);
 		String jsonWrapper = "";
 		try {
 			jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(ready));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		LOGGER.info("Welcome wrapper: " + jsonWrapper);
 		return jsonWrapper;
 	}
 

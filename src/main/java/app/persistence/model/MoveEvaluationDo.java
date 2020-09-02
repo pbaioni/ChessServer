@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class MoveEvaluation {
+public class MoveEvaluationDo {
 	
 	@Id
 	@GeneratedValue
@@ -24,11 +24,11 @@ public class MoveEvaluation {
 	@Column
 	private int depth;
 	
-	public MoveEvaluation() {
+	public MoveEvaluationDo() {
 		
 	}
 
-	public MoveEvaluation(String move, int evaluation, int centipawnLoss, int depth) {
+	public MoveEvaluationDo(String move, int evaluation, int centipawnLoss, int depth) {
 		super();
 		this.move = move;
 		this.evaluation = evaluation;

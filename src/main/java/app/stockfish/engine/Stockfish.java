@@ -10,8 +10,8 @@ import app.stockfish.engine.enums.Variant;
 import app.stockfish.exceptions.StockfishInitException;
 
 public class Stockfish extends UCIEngine {
-	public Stockfish(String path, Variant variant, Option... options) throws StockfishInitException {
-		super(path, variant, options);
+	public Stockfish(String path, Variant variant, Boolean ownBook, Option... options) throws StockfishInitException {
+		super(path, variant, ownBook, options);
 	}
 
 	public String makeMove(Query query) {

@@ -10,9 +10,9 @@ public class StockfishTester {
     public static void main(String[] args) throws StockfishInitException {
         StockfishClient client = new StockfishClient.Builder()
                 .setInstances(4)
-                .setOption(Option.Threads, 4) // Number of threads that Stockfish will use
-                .setOption(Option.Minimum_Thinking_Time, 1000) // Minimum thinking time Stockfish will take
-                .setOption(Option.Skill_Level, 10) // Stockfish skill level 0-20
+                .setOption(Option.Threads, "4") // Number of threads that Stockfish will use
+                .setOption(Option.Minimum_Thinking_Time, "1000") // Minimum thinking time Stockfish will take
+                .setOption(Option.Skill_Level, "10") // Stockfish skill level 0-20
                 .setVariant(Variant.BMI2) // Stockfish Variant
                 .build();
 

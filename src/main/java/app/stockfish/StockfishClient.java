@@ -19,14 +19,15 @@ public class StockfishClient {
 	private ExecutorService executor, callback;
 	private Queue<Stockfish> engines;
 
-	public StockfishClient(String path, int instances, Variant variant, Set<Option> options)
+	public StockfishClient(String path, int instances, Variant variant, Boolean ownBook, Set<Option> options)
 			throws StockfishInitException {
 		executor = Executors.newFixedThreadPool(instances);
 		callback = Executors.newSingleThreadExecutor();
 		engines = new ArrayBlockingQueue<Stockfish>(instances);
 
-		for (int i = 0; i < instances; i++)
-			engines.add(new Stockfish(path, variant, options.toArray(new Option[options.size()])));
+		for (int i = 0; i < instances; i++) {
+			engines.add(new Stockfish(path, variant, ownBook, options.toArray(new Option[options.size()])));
+		}
 	}
 
 	public void submit(Query query) {
@@ -80,6 +81,7 @@ public class StockfishClient {
 		private Variant variant = Variant.DEFAULT;
 		private String path = null;
 		private int instances = 1;
+		private boolean ownBook = true;
 
 		public final Builder setInstances(int num) {
 			instances = num;
@@ -91,7 +93,7 @@ public class StockfishClient {
 			return this;
 		}
 
-		public final Builder setOption(Option o, long value) {
+		public final Builder setOption(Option o, String value) {
 			options.add(o.setValue(value));
 			return this;
 		}
@@ -102,7 +104,7 @@ public class StockfishClient {
 		}
 
 		public final StockfishClient build() throws StockfishInitException {
-			return new StockfishClient(path, instances, variant, options);
+			return new StockfishClient(path, instances, variant, ownBook, options);
 		}
 	}
 }
