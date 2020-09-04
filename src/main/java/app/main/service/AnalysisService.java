@@ -107,6 +107,7 @@ public class AnalysisService {
 	public String deleteLine(String fen, String move) {
 		LOGGER.info("Deleting move " + move + " for fen " + fen);
 
+		String rval = "";
 		// removing move evaluation from variant base
 		AnalysisDo variantBase = getAnalysis(FenHelper.getShortFen(fen));
 		MoveEvaluationDo moveToDelete = null;
@@ -117,16 +118,19 @@ public class AnalysisService {
 		}
 		if (!Objects.isNull(moveToDelete)) {
 			variantBase.getMoveEvaluations().remove(moveToDelete);
+			if (!Objects.isNull(moveToDelete.getFen())) {
+				deleteAnalysis(getAnalysis(moveToDelete.getFen()));
+			}
 			analysisRepository.save(variantBase);
+			rval = "Line deleted";
+		} else {
+			rval = "Line not found";
 		}
 
-		// removing all the variant line
-		deleteAnalysis(getAnalysis(moveToDelete.getFen()));
-		
 		// returning analysis as json string
 		String jsonWrapper = "";
 		try {
-			jsonWrapper = mapper.writeValueAsString("Line Deleted");
+			jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(rval));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
