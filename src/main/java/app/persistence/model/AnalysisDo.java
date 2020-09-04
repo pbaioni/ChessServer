@@ -111,11 +111,11 @@ public class AnalysisDo {
 		this.comment = comment;
 	}
 
-	public void setEngineEvaluation(EngineEvaluation engineEvaluation) {
+	public void setEngineEvaluation(EngineEvaluation engineEvaluation, String nextFen) {
 		setEvaluation(engineEvaluation.getEvaluation());
 		setBestMove(engineEvaluation.getBestMove());
 		setDepth(engineEvaluation.getDepth());
-		MoveEvaluationDo firstEval = new MoveEvaluationDo(getBestMove(), getEvaluation(), 0, getDepth());
+		MoveEvaluationDo firstEval = new MoveEvaluationDo(getBestMove(), null, getEvaluation(), 0, getDepth());
 		moveEvaluations.add(firstEval);
 	}
 
@@ -129,10 +129,11 @@ public class AnalysisDo {
 				centipawnLoss = centipawnLoss * (-1);
 			}
 			// new move case
-			evaluation = new MoveEvaluationDo(move, analysis.getEvaluation(), centipawnLoss, analysis.depth);
+			evaluation = new MoveEvaluationDo(move, analysis.getFen(), analysis.getEvaluation(), centipawnLoss, analysis.depth);
 			moveEvaluations.add(evaluation);
 		} else {
 			// move update case (better engine depth)
+			evaluation.setFen(analysis.getFen());
 			evaluation.setEvaluation(analysis.getEvaluation());
 			evaluation.setDepth(analysis.getDepth());
 		}

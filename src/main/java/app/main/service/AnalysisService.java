@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
+import app.persistence.model.MoveEvaluationDo;
 import app.persistence.repo.AnalysisRepository;
 import app.stockfish.engine.EngineEvaluation;
 import app.stockfish.service.StockfishService;
@@ -72,9 +73,9 @@ public class AnalysisService {
 			LOGGER.info("No result from database, computing analysis for fen: " + fen);
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(fen);
 			analysis = new AnalysisDo(fen);
-			analysis.setEngineEvaluation(engineEvaluation);
+			analysis.setEngineEvaluation(engineEvaluation, fen);
 			if (Objects.isNull(previousFen) && Objects.isNull(move)) {
-				//start position case, empty database
+				// start position case, empty database
 				analysisRepository.save(analysis);
 				LOGGER.info("Start position analysis saved");
 			} else {
@@ -103,6 +104,57 @@ public class AnalysisService {
 
 	}
 
+	public String deleteLine(String fen, String move) {
+		LOGGER.info("Deleting move " + move + " for fen " + fen);
+
+		// removing move evaluation from variant base
+		AnalysisDo variantBase = getAnalysis(FenHelper.getShortFen(fen));
+		MoveEvaluationDo moveToDelete = null;
+		for (MoveEvaluationDo moveItem : variantBase.getMoveEvaluations()) {
+			if (moveItem.getMove().equals(move)) {
+				moveToDelete = moveItem;
+			}
+		}
+		if (!Objects.isNull(moveToDelete)) {
+			variantBase.getMoveEvaluations().remove(moveToDelete);
+			analysisRepository.save(variantBase);
+		}
+
+		// removing all the variant line
+		deleteAnalysis(getAnalysis(moveToDelete.getFen()));
+		
+		// returning analysis as json string
+		String jsonWrapper = "";
+		try {
+			jsonWrapper = mapper.writeValueAsString("Line Deleted");
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		return jsonWrapper;
+	}
+
+	private AnalysisDo getAnalysis(String shortFen) {
+		Optional<AnalysisDo> databaseAnalysis;
+		AnalysisDo analysis = null;
+		databaseAnalysis = analysisRepository.findById(shortFen);
+		if (databaseAnalysis.isPresent()) {
+			analysis = databaseAnalysis.get();
+		}
+		return analysis;
+	}
+
+	private void deleteAnalysis(AnalysisDo analysis) {
+		if (!Objects.isNull(analysis)) {
+			analysisRepository.delete(analysis);
+			LOGGER.info("Analysis deleted for fen: " + analysis.getFen());
+			for (MoveEvaluationDo moveEval : analysis.getMoveEvaluations()) {
+				if (!Objects.isNull(moveEval.getFen())) {
+					deleteAnalysis(getAnalysis(FenHelper.getShortFen(moveEval.getFen())));
+				}
+			}
+		}
+	}
+
 	public void stop() {
 		stockfishService.stop();
 	}
@@ -110,9 +162,10 @@ public class AnalysisService {
 	public void dropAll() {
 		analysisRepository.deleteAll();
 	}
-	
+
 	public void setFirstEval() {
-		Optional<AnalysisDo> databaseAnalysis = analysisRepository.findById(FenHelper.getShortFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
+		Optional<AnalysisDo> databaseAnalysis = analysisRepository
+				.findById(FenHelper.getShortFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
 		AnalysisDo first = databaseAnalysis.get();
 		first.setEvaluation(20);
 		first.getMoveEvaluations().get(0).setEvaluation(20);

@@ -32,10 +32,19 @@ public class AnalysisController {
     }
     
     @PostMapping("/analysis")
-    public String getAnalysis(@RequestBody String parameters) {
+    public String getAnalysis(@RequestBody String analysisParameters) {
     	Gson g = new Gson();
-    	AnalysisParameters params = g.fromJson(parameters, AnalysisParameters.class);
+    	AnalysisParameters params = g.fromJson(analysisParameters, AnalysisParameters.class);
     	return analysisService.getAnalysis(params.getPreviousFen(), params.getMove(), params.getFen());
+    }
+    
+    @PostMapping("/delete")
+    public String deleteLine(@RequestBody String deleteParameters) {
+    	System.out.println("Delete");
+    	Gson g = new Gson();
+    	DeleteParameters params = g.fromJson(deleteParameters, DeleteParameters.class);
+    	return analysisService.deleteLine(params.getFen(), params.getMove());
+
     }
 	
 }
