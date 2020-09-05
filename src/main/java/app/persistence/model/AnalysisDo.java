@@ -114,14 +114,14 @@ public class AnalysisDo {
 	public void mergeMoveEvaluation(MoveEvaluationDo movetoMerge) {
 
 		MoveEvaluationDo move = getEvaluationByMove(movetoMerge.getMove());
-		
-		if(Objects.isNull(move)) {
-			//adding new move
+
+		if (Objects.isNull(move)) {
+			// adding new move
 			moveEvaluations.add(movetoMerge);
-		}else {
-			//merging new result for the old move
-			//merging only deeper analysis
-			if(movetoMerge.getDepth() > move.getDepth()) {
+		} else {
+			// merging new result for the old move
+			// merging only deeper analysis
+			if (movetoMerge.getDepth() >= move.getDepth()) {
 				move.setEvaluation(movetoMerge.getEvaluation());
 				move.setNextShortFen(movetoMerge.getNextShortFen());
 				move.setDepth(movetoMerge.getDepth());
@@ -131,7 +131,21 @@ public class AnalysisDo {
 		recalculateBestMove();
 	}
 
-	private MoveEvaluationDo getEvaluationByMove(String move) {
+	public Boolean pruneMoveEvaluation(String move) {
+
+		MoveEvaluationDo moveToPrune = getEvaluationByMove(move);
+
+		if (!Objects.isNull(move)) {
+			moveEvaluations.remove(moveToPrune);
+			recalculateBestMove();
+			return true;
+		}
+
+		return false;
+
+	}
+
+	public MoveEvaluationDo getEvaluationByMove(String move) {
 		MoveEvaluationDo rval = null;
 		for (MoveEvaluationDo eval : moveEvaluations) {
 			if (eval.getMove().equals(move)) {
@@ -166,9 +180,8 @@ public class AnalysisDo {
 			factor = -1;
 		}
 		// updating centipawn losses
-		for (
-		MoveEvaluationDo eval : moveEvaluations) {
-			eval.setCentipawnLoss(factor*bestEval.getEvaluation() - factor*eval.getEvaluation());
+		for (MoveEvaluationDo eval : moveEvaluations) {
+			eval.setCentipawnLoss(factor * bestEval.getEvaluation() - factor * eval.getEvaluation());
 		}
 
 	}
