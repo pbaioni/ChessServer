@@ -111,31 +111,21 @@ public class AnalysisDo {
 		this.comment = comment;
 	}
 
-	public void setEngineEvaluation(EngineEvaluation engineEvaluation, String nextFen) {
-		setEvaluation(engineEvaluation.getEvaluation());
-		setBestMove(engineEvaluation.getBestMove());
-		setDepth(engineEvaluation.getDepth());
-		MoveEvaluationDo firstEval = new MoveEvaluationDo(getBestMove(), null, getEvaluation(), 0, getDepth());
-		moveEvaluations.add(firstEval);
-	}
+	public void mergeMoveEvaluation(MoveEvaluationDo movetoMerge) {
 
-	public void mergeMove(String move, AnalysisDo analysis) {
-
-		MoveEvaluationDo evaluation = getEvaluationByMove(move);
-
-		if (Objects.isNull(evaluation)) {
-			int centipawnLoss = getEvaluation() - analysis.getEvaluation();
-			if (FenHelper.getTurn(getFen()).equals("b")) {
-				centipawnLoss = centipawnLoss * (-1);
+		MoveEvaluationDo move = getEvaluationByMove(movetoMerge.getMove());
+		
+		if(Objects.isNull(move)) {
+			//adding new move
+			moveEvaluations.add(movetoMerge);
+		}else {
+			//merging new result for the old move
+			//merging only deeper analysis
+			if(movetoMerge.getDepth() > move.getDepth()) {
+				move.setEvaluation(movetoMerge.getEvaluation());
+				move.setNextShortFen(movetoMerge.getNextShortFen());
+				move.setDepth(movetoMerge.getDepth());
 			}
-			// new move case
-			evaluation = new MoveEvaluationDo(move, analysis.getFen(), analysis.getEvaluation(), centipawnLoss, analysis.depth);
-			moveEvaluations.add(evaluation);
-		} else {
-			// move update case (better engine depth)
-			evaluation.setFen(analysis.getFen());
-			evaluation.setEvaluation(analysis.getEvaluation());
-			evaluation.setDepth(analysis.getDepth());
 		}
 
 		recalculateBestMove();

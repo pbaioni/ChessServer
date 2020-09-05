@@ -39,9 +39,9 @@ public class AnalysisService {
 		// empty database, setting start position
 		if (analysisRepository.count() == 0L) {
 			String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-			EngineEvaluation engineEvaluation = new EngineEvaluation("0,2", 0);
 			AnalysisDo analysis = new AnalysisDo(startFen);
-			analysis.setEngineEvaluation(engineEvaluation, startFen);
+			MoveEvaluationDo firstEval = new MoveEvaluationDo("e2e4", null, 20, 0, 0);
+			analysis.mergeMoveEvaluation(firstEval);
 			analysisRepository.save(analysis);
 			LOGGER.info("Start position analysis saved");
 		}
@@ -59,16 +59,18 @@ public class AnalysisService {
 	public String performAnalysis(String previousFen, String move, String fen) {
 
 		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
-		
-		//no result in database
+
+		// no result in database
 		if (Objects.isNull(analysis)) {
 			LOGGER.info("No result from database, performing analysis for fen: " + fen);
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(fen);
 			analysis = new AnalysisDo(fen);
-			analysis.setEngineEvaluation(engineEvaluation, fen);
+			MoveEvaluationDo eval = new MoveEvaluationDo(engineEvaluation.getBestMove(), fen, engineEvaluation.getEvaluation(), 0, engineEvaluation.getDepth());
+			analysis.mergeMoveEvaluation(eval);
 			if (!Objects.isNull(previousFen) && !Objects.isNull(move)) {
 				AnalysisDo previous = findAnalysisInDb(FenHelper.getShortFen(previousFen));
-				previous.mergeMove(move, analysis);
+				MoveEvaluationDo evalUpdate = new MoveEvaluationDo(move, fen, engineEvaluation.getEvaluation(), 0, engineEvaluation.getDepth());
+				previous.mergeMoveEvaluation(evalUpdate);
 				analysisRepository.save(previous);
 				analysisRepository.save(analysis);
 				LOGGER.info("New analysis merged to previous position and saved: " + analysis.toString());
@@ -93,8 +95,8 @@ public class AnalysisService {
 		}
 		if (!Objects.isNull(moveToDelete)) {
 			variantBase.getMoveEvaluations().remove(moveToDelete);
-			if (!Objects.isNull(moveToDelete.getFen())) {
-				deleteAnalysis(findAnalysisInDb(moveToDelete.getFen()));
+			if (!Objects.isNull(moveToDelete.getNextShortFen())) {
+				deleteAnalysis(findAnalysisInDb(moveToDelete.getNextShortFen()));
 			}
 			analysisRepository.save(variantBase);
 			rval = "Line deleted";
@@ -112,8 +114,8 @@ public class AnalysisService {
 			analysisRepository.delete(analysis);
 			LOGGER.info("Analysis deleted for fen: " + analysis.getFen());
 			for (MoveEvaluationDo moveEval : analysis.getMoveEvaluations()) {
-				if (!Objects.isNull(moveEval.getFen())) {
-					deleteAnalysis(findAnalysisInDb(FenHelper.getShortFen(moveEval.getFen())));
+				if (!Objects.isNull(moveEval.getNextShortFen())) {
+					deleteAnalysis(findAnalysisInDb(FenHelper.getShortFen(moveEval.getNextShortFen())));
 				}
 			}
 		}

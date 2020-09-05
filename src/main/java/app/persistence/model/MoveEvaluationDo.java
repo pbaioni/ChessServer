@@ -20,7 +20,7 @@ public class MoveEvaluationDo {
 	private String move;
 
 	@Column
-	private String fen;
+	private String nextShortFen;
 
 	@Column
 	private int evaluation;
@@ -35,13 +35,13 @@ public class MoveEvaluationDo {
 
 	}
 
-	public MoveEvaluationDo(String move, String fen, int evaluation, int centipawnLoss, int depth) {
+	public MoveEvaluationDo(String move, String nextFen, int evaluation, int centipawnLoss, int depth) {
 		super();
 		this.move = move;
-		if (!Objects.isNull(fen)) {
-			this.fen = FenHelper.getShortFen(fen);
+		if (!Objects.isNull(nextFen)) {
+			this.nextShortFen = FenHelper.getShortFen(nextFen);
 		}else {
-			this.fen = null;
+			this.nextShortFen = null;
 		}
 		this.evaluation = evaluation;
 		this.centipawnLoss = centipawnLoss;
@@ -56,12 +56,12 @@ public class MoveEvaluationDo {
 		this.move = move;
 	}
 
-	public String getFen() {
-		return fen;
+	public String getNextShortFen() {
+		return nextShortFen;
 	}
 
-	public void setFen(String fen) {
-		this.fen = fen;
+	public void setNextShortFen(String nextShortFen) {
+		this.nextShortFen = nextShortFen;
 	}
 
 	public int getEvaluation() {
@@ -90,7 +90,7 @@ public class MoveEvaluationDo {
 
 	@Override
 	public String toString() {
-		return "MoveEvaluationDo [id=" + id + ", move=" + move + ", fen=" + fen + ", evaluation=" + evaluation
+		return "MoveEvaluationDo [id=" + id + ", move=" + move + ", fen=" + nextShortFen + ", evaluation=" + evaluation
 				+ ", centipawnLoss=" + centipawnLoss + ", depth=" + depth + "]";
 	}
 
