@@ -35,72 +35,47 @@ public class AnalysisService {
 
 	public void init() {
 		stockfishService.init();
+
+		// empty database, setting start position
+		if (analysisRepository.count() == 0L) {
+			String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+			EngineEvaluation engineEvaluation = new EngineEvaluation("0,2", 0);
+			AnalysisDo analysis = new AnalysisDo(startFen);
+			analysis.setEngineEvaluation(engineEvaluation, startFen);
+			analysisRepository.save(analysis);
+			LOGGER.info("Start position analysis saved");
+		}
 	}
 
 	public String welcome() {
-		String ready = "Board service is ready";
-		String jsonWrapper = "";
-		try {
-			jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(ready));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		return jsonWrapper;
+		return wrapResponse(new SimpleResponseWrapper("Board service is ready"));
 	}
 
 	public String getOnlyPawnsFen(String fen) {
-		LOGGER.info("Cleaning pieces from fen: " + fen);
-		String jsonWrapper = "";
-		try {
-			jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(FenHelper.cleanPiecesFromFen(fen)));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		LOGGER.info("Only pawns fen wrapper: " + jsonWrapper);
-		return jsonWrapper;
+		LOGGER.debug("Cleaning pieces from fen: " + fen);
+		return wrapResponse(new SimpleResponseWrapper(FenHelper.cleanPiecesFromFen(fen)));
 	}
 
-	public String getAnalysis(String previousFen, String move, String fen) {
+	public String performAnalysis(String previousFen, String move, String fen) {
 
-		Optional<AnalysisDo> databaseAnalysis;
-		AnalysisDo analysis;
-		LOGGER.info("Searching for analysis in DB");
-		databaseAnalysis = analysisRepository.findById(FenHelper.getShortFen(fen));
-		if (databaseAnalysis.isPresent()) {
-			analysis = databaseAnalysis.get();
-			LOGGER.info("Analysis from DB: " + analysis.toString());
-		} else {
-			LOGGER.info("No result from database, computing analysis for fen: " + fen);
+		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
+		
+		//no result in database
+		if (Objects.isNull(analysis)) {
+			LOGGER.info("No result from database, performing analysis for fen: " + fen);
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(fen);
 			analysis = new AnalysisDo(fen);
 			analysis.setEngineEvaluation(engineEvaluation, fen);
-			if (Objects.isNull(previousFen) && Objects.isNull(move)) {
-				// start position case, empty database
+			if (!Objects.isNull(previousFen) && !Objects.isNull(move)) {
+				AnalysisDo previous = findAnalysisInDb(FenHelper.getShortFen(previousFen));
+				previous.mergeMove(move, analysis);
+				analysisRepository.save(previous);
 				analysisRepository.save(analysis);
-				LOGGER.info("Start position analysis saved");
-			} else {
-				Optional<AnalysisDo> previousDatabaseAnalysis;
-				previousDatabaseAnalysis = analysisRepository.findById(FenHelper.getShortFen(previousFen));
-				if (previousDatabaseAnalysis.isPresent()) {
-					AnalysisDo previous = previousDatabaseAnalysis.get();
-					previous.mergeMove(move, analysis);
-					analysisRepository.save(previous);
-					analysisRepository.save(analysis);
-					LOGGER.info("New analysis merged to previous position and saved: " + analysis.toString());
-				}
+				LOGGER.info("New analysis merged to previous position and saved: " + analysis.toString());
 			}
-
 		}
 
-		// returning analysis as json string
-		String jsonWrapper = "";
-		try {
-			jsonWrapper = mapper.writeValueAsString(analysis);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		LOGGER.info("Analysis wrapper: " + jsonWrapper);
-		return jsonWrapper;
+		return wrapResponse(analysis);
 
 	}
 
@@ -109,7 +84,7 @@ public class AnalysisService {
 
 		String rval = "";
 		// removing move evaluation from variant base
-		AnalysisDo variantBase = getAnalysis(FenHelper.getShortFen(fen));
+		AnalysisDo variantBase = findAnalysisInDb(FenHelper.getShortFen(fen));
 		MoveEvaluationDo moveToDelete = null;
 		for (MoveEvaluationDo moveItem : variantBase.getMoveEvaluations()) {
 			if (moveItem.getMove().equals(move)) {
@@ -119,7 +94,7 @@ public class AnalysisService {
 		if (!Objects.isNull(moveToDelete)) {
 			variantBase.getMoveEvaluations().remove(moveToDelete);
 			if (!Objects.isNull(moveToDelete.getFen())) {
-				deleteAnalysis(getAnalysis(moveToDelete.getFen()));
+				deleteAnalysis(findAnalysisInDb(moveToDelete.getFen()));
 			}
 			analysisRepository.save(variantBase);
 			rval = "Line deleted";
@@ -128,16 +103,23 @@ public class AnalysisService {
 		}
 
 		// returning analysis as json string
-		String jsonWrapper = "";
-		try {
-			jsonWrapper = mapper.writeValueAsString(new SimpleResponseWrapper(rval));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		return jsonWrapper;
+		return wrapResponse(new SimpleResponseWrapper(rval));
+
 	}
 
-	private AnalysisDo getAnalysis(String shortFen) {
+	private void deleteAnalysis(AnalysisDo analysis) {
+		if (!Objects.isNull(analysis)) {
+			analysisRepository.delete(analysis);
+			LOGGER.info("Analysis deleted for fen: " + analysis.getFen());
+			for (MoveEvaluationDo moveEval : analysis.getMoveEvaluations()) {
+				if (!Objects.isNull(moveEval.getFen())) {
+					deleteAnalysis(findAnalysisInDb(FenHelper.getShortFen(moveEval.getFen())));
+				}
+			}
+		}
+	}
+
+	private AnalysisDo findAnalysisInDb(String shortFen) {
 		Optional<AnalysisDo> databaseAnalysis;
 		AnalysisDo analysis = null;
 		databaseAnalysis = analysisRepository.findById(shortFen);
@@ -147,33 +129,29 @@ public class AnalysisService {
 		return analysis;
 	}
 
-	private void deleteAnalysis(AnalysisDo analysis) {
-		if (!Objects.isNull(analysis)) {
-			analysisRepository.delete(analysis);
-			LOGGER.info("Analysis deleted for fen: " + analysis.getFen());
-			for (MoveEvaluationDo moveEval : analysis.getMoveEvaluations()) {
-				if (!Objects.isNull(moveEval.getFen())) {
-					deleteAnalysis(getAnalysis(FenHelper.getShortFen(moveEval.getFen())));
-				}
-			}
+	private String wrapResponse(Object response) {
+		String jsonWrapper = "";
+		try {
+			jsonWrapper = mapper.writeValueAsString(response);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
 		}
+		LOGGER.debug("Response wrapper: " + jsonWrapper);
+		return jsonWrapper;
 	}
 
 	public void stop() {
 		stockfishService.stop();
 	}
 
+	// methods for command controller
+
 	public void dropAll() {
 		analysisRepository.deleteAll();
 	}
 
-	public void setFirstEval() {
-		Optional<AnalysisDo> databaseAnalysis = analysisRepository
-				.findById(FenHelper.getShortFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
-		AnalysisDo first = databaseAnalysis.get();
-		first.setEvaluation(20);
-		first.getMoveEvaluations().get(0).setEvaluation(20);
-		analysisRepository.save(first);
+	public void updateDepth(String string) {
+
 	}
 
 }
