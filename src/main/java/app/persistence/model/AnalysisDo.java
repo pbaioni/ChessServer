@@ -28,6 +28,9 @@ public class AnalysisDo {
 
 	@Column
 	private String fen;
+	
+	@Column
+	private String turn;
 
 	@Column
 	private int evaluation;
@@ -43,7 +46,7 @@ public class AnalysisDo {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
 	@CollectionTable(name = "moves", joinColumns = @JoinColumn(name = "move"))
-	private List<MoveEvaluationDo> moveEvaluations;
+	private List<MoveEvaluationDo> moves;
 
 	public AnalysisDo() {
 		// NOTHING TO DO
@@ -52,7 +55,9 @@ public class AnalysisDo {
 	public AnalysisDo(String fen) {
 		this.shortFen = FenHelper.getShortFen(fen);
 		this.fen = fen;
-		moveEvaluations = new ArrayList<MoveEvaluationDo>();
+		this.turn = FenHelper.getTurn(fen);
+		moves = new ArrayList<MoveEvaluationDo>();
+		this.depth = 0;
 	}
 
 	public String getShortFen() {
@@ -70,13 +75,21 @@ public class AnalysisDo {
 	public void setFen(String fen) {
 		this.fen = fen;
 	}
-
-	public List<MoveEvaluationDo> getMoveEvaluations() {
-		return moveEvaluations;
+	
+	public String getTurn() {
+		return turn;
 	}
 
-	public void setMoveEvaluations(List<MoveEvaluationDo> moveEvaluations) {
-		this.moveEvaluations = moveEvaluations;
+	public void setTurn(String turn) {
+		this.turn = turn;
+	}
+
+	public List<MoveEvaluationDo> getMoves() {
+		return moves;
+	}
+
+	public void setMoves(List<MoveEvaluationDo> moves) {
+		this.moves = moves;
 	}
 
 	public int getEvaluation() {
@@ -111,43 +124,25 @@ public class AnalysisDo {
 		this.comment = comment;
 	}
 
-	public void mergeMoveEvaluation(MoveEvaluationDo movetoMerge) {
+	public void addMove(MoveEvaluationDo move) {
 
-		MoveEvaluationDo move = getEvaluationByMove(movetoMerge.getMove());
+		moves.add(move);
 
-		if (Objects.isNull(move)) {
-			// adding new move
-			moveEvaluations.add(movetoMerge);
-		} else {
-			// merging new result for the old move
-			// merging only deeper analysis
-			if (movetoMerge.getDepth() >= move.getDepth()) {
-				move.setEvaluation(movetoMerge.getEvaluation());
-				move.setNextShortFen(movetoMerge.getNextShortFen());
-				move.setDepth(movetoMerge.getDepth());
-			}
-		}
-
-		recalculateBestMove();
 	}
 
-	public Boolean pruneMoveEvaluation(String move) {
+	public void removeMove(String move) {
 
 		MoveEvaluationDo moveToPrune = getEvaluationByMove(move);
 
 		if (!Objects.isNull(move)) {
-			moveEvaluations.remove(moveToPrune);
-			recalculateBestMove();
-			return true;
+			moves.remove(moveToPrune);
 		}
-
-		return false;
 
 	}
 
 	public MoveEvaluationDo getEvaluationByMove(String move) {
 		MoveEvaluationDo rval = null;
-		for (MoveEvaluationDo eval : moveEvaluations) {
+		for (MoveEvaluationDo eval : moves) {
 			if (eval.getMove().equals(move)) {
 				rval = eval;
 			}
@@ -155,41 +150,10 @@ public class AnalysisDo {
 		return rval;
 	}
 
-	private void recalculateBestMove() {
-		// looking for the best analyzed move
-		MoveEvaluationDo bestEval = moveEvaluations.get(0);
-		for (MoveEvaluationDo eval : moveEvaluations) {
-			if (FenHelper.getTurn(getFen()).equals("b")) {
-				if (eval.getEvaluation() < bestEval.getEvaluation()) {
-					bestEval = eval;
-				}
-			} else {
-				if (eval.getEvaluation() > bestEval.getEvaluation()) {
-					bestEval = eval;
-				}
-			}
-		}
-
-		// updating analysis properties
-		setEvaluation(bestEval.getEvaluation());
-		setBestMove(bestEval.getMove());
-		setDepth(bestEval.getDepth());
-
-		int factor = 1;
-		if (FenHelper.getTurn(getFen()).equals("b")) {
-			factor = -1;
-		}
-		// updating centipawn losses
-		for (MoveEvaluationDo eval : moveEvaluations) {
-			eval.setCentipawnLoss(factor * bestEval.getEvaluation() - factor * eval.getEvaluation());
-		}
-
-	}
-
 	@Override
 	public String toString() {
-		return "AnalysisDo [shortFen=" + shortFen + ", fen=" + fen + ", evaluation=" + evaluation + ", bestMove="
-				+ bestMove + ", depth=" + depth + ", comment=" + comment + ", moveEvaluations=" + moveEvaluations + "]";
+		return "AnalysisDo [shortFen=" + shortFen + ", fen=" + fen + ", turn=" + turn + ", evaluation=" + evaluation
+				+ ", bestMove=" + bestMove + ", depth=" + depth + ", comment=" + comment + ", moves=" + moves + "]";
 	}
 
 }

@@ -17,6 +17,8 @@ import app.persistence.model.MoveEvaluationDo;
 import app.persistence.repo.AnalysisRepository;
 import app.stockfish.engine.EngineEvaluation;
 import app.stockfish.service.StockfishService;
+import app.web.api.model.AnalysisDTO;
+import app.web.api.model.MoveEvaluationDTO;
 import app.web.api.model.SimpleResponseWrapper;
 
 @Service
@@ -40,10 +42,11 @@ public class AnalysisService {
 		if (analysisRepository.count() == 0L) {
 			String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 			AnalysisDo analysis = new AnalysisDo(startFen);
-			MoveEvaluationDo firstEval = new MoveEvaluationDo("e2e4", null, 20, 0, 0);
-			analysis.mergeMoveEvaluation(firstEval);
+			analysis.setBestMove("e2e4");
+			analysis.setEvaluation(20);
+			analysis.setDepth(24);
 			analysisRepository.save(analysis);
-			LOGGER.info("Start position analysis saved");
+			LOGGER.info("Start position analysis saved: " + analysis.toString());
 		}
 	}
 
@@ -56,50 +59,81 @@ public class AnalysisService {
 		return wrapResponse(new SimpleResponseWrapper(FenHelper.cleanPiecesFromFen(fen)));
 	}
 
-	public String performAnalysis(String previousFen, String move, String fen) {
+	public String performAnalysis(String currentFen, String move, String nextFen, int depth) {
 
-		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
+		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
 
-		// no result in database
-		if (Objects.isNull(analysis)) {
-			LOGGER.info("No result from database, performing analysis for fen: " + fen);
-			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(fen);
-			analysis = new AnalysisDo(fen);
-			MoveEvaluationDo eval = new MoveEvaluationDo(engineEvaluation.getBestMove(), null,
-					engineEvaluation.getEvaluation(), 0, engineEvaluation.getDepth());
-			analysis.mergeMoveEvaluation(eval);
-			if (!Objects.isNull(previousFen) && !Objects.isNull(move)) {
-				AnalysisDo previous = findAnalysisInDb(FenHelper.getShortFen(previousFen));
-				MoveEvaluationDo evalUpdate = new MoveEvaluationDo(move, fen, engineEvaluation.getEvaluation(), 0,
-						engineEvaluation.getDepth());
-				previous.mergeMoveEvaluation(evalUpdate);
-				analysisRepository.save(previous);
-				analysisRepository.save(analysis);
-				LOGGER.info("New analysis merged to previous position and saved: " + analysis.toString());
+		if (!Objects.isNull(nextPosition)) {
+			// position from DB
+			LOGGER.debug("Analysis fetched: " + nextPosition.toString());
+		} else {
+			// No result from DB, performing analysis
+			nextPosition = new AnalysisDo(nextFen);
+			LOGGER.info("No result from database, performing analysis for fen: " + nextFen);
+			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(nextFen, depth);
+	
+			nextPosition.setBestMove(engineEvaluation.getBestMove());
+			nextPosition.setEvaluation(engineEvaluation.getEvaluation());
+			nextPosition.setDepth(depth);
+			LOGGER.debug("NextCalculated: " + nextPosition.toString());
+			if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
+				AnalysisDo currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
+				MoveEvaluationDo newMove = new MoveEvaluationDo(move, nextFen);
+				LOGGER.debug("CurrentFetched: " + currentPosition.toString());
+				currentPosition.addMove(newMove);
+				LOGGER.debug("CurrentEnd: " + currentPosition.toString());
+				analysisRepository.save(currentPosition);
+				analysisRepository.save(nextPosition);
+				LOGGER.info("New analysis linked to previous position and saved: " + nextPosition.toString());
 			}
 		}
 
-		return wrapResponse(analysis);
+	AnalysisDTO analysis = mapToDto(nextPosition);
+
+	return wrapResponse(analysis);
 
 	}
 
+	private AnalysisDTO mapToDto(AnalysisDo Do) {
+
+		AnalysisDTO analysis = new AnalysisDTO(Do.getFen(), Do.getTurn(), Do.getDepth());
+		for (MoveEvaluationDo move : Do.getMoves()) {
+			analysis.addMove(move.getMove(), findAnalysisInDb(move.getNextShortFen()).getEvaluation());
+		}
+
+		boolean bestMoveMatch = false;
+		for (MoveEvaluationDTO item : analysis.getMoves()) {
+			if (item.getMove().equals(Do.getBestMove())) {
+				bestMoveMatch = true;
+			}
+		}
+
+		// case of best move only as a result of stockfish analysis but never browsed
+		if (!bestMoveMatch) {
+			analysis.addMove(Do.getBestMove(), Do.getEvaluation());
+		}
+		LOGGER.debug("DTO: " + analysis.toString());
+
+		return analysis;
+	}
+
 	public String deleteLine(String fen, String move) {
-		
+
 		LOGGER.info("Deleting move " + move + " for fen " + fen);
 		String rval = "";
-		
+
 		// removing move evaluation from variant base
 		AnalysisDo variantBase = findAnalysisInDb(FenHelper.getShortFen(fen));
 		MoveEvaluationDo moveToPrune = variantBase.getEvaluationByMove(move);
 		if (!Objects.isNull(moveToPrune)) {
-			variantBase.pruneMoveEvaluation(moveToPrune.getMove());
+			variantBase.removeMove(moveToPrune.getMove());
 			analysisRepository.save(variantBase);
-			
-			//removing all the lines linked to this move
+
+			// removing all the lines linked to this move
 			deleteLine(findAnalysisInDb(moveToPrune.getNextShortFen()));
-			
+
 			rval = "Line deleted";
-		}else {
+		} else {
 			rval = "Line not found";
 		}
 
@@ -112,7 +146,7 @@ public class AnalysisService {
 		if (!Objects.isNull(analysis)) {
 			analysisRepository.delete(analysis);
 			LOGGER.info("Analysis deleted for fen: " + analysis.getFen());
-			for (MoveEvaluationDo moveEval : analysis.getMoveEvaluations()) {
+			for (MoveEvaluationDo moveEval : analysis.getMoves()) {
 				if (!Objects.isNull(moveEval.getNextShortFen())) {
 					deleteLine(findAnalysisInDb(moveEval.getNextShortFen()));
 				}

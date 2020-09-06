@@ -46,7 +46,7 @@ abstract class UCIEngine {
 
 	void sendCommand(String command) {
 		try {
-			LOGGER.info("Sending command: " + command);
+			LOGGER.debug("Sending command: " + command);
 			output.write(command + "\n");
 			output.flush();
 		} catch (IOException e) {
@@ -59,7 +59,7 @@ abstract class UCIEngine {
 			String line;
 
 			while ((line = input.readLine()) != null) {
-				LOGGER.info("Read line: " + line);
+				LOGGER.debug("Read line: " + line);
 				if (line.startsWith(expected))
 					return line;
 			}
@@ -78,7 +78,7 @@ abstract class UCIEngine {
 			while ((line = input.readLine()) != null) {
 				lines.add(line);
 				if (line.startsWith(expected)) {
-					LOGGER.info("Read response: " + line);
+					LOGGER.debug("Read response: " + line);
 					break;
 				}
 			}

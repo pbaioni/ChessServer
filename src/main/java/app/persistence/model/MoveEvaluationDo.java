@@ -22,20 +22,12 @@ public class MoveEvaluationDo {
 	@Column
 	private String nextShortFen;
 
-	@Column
-	private int evaluation;
-
-	@Column
-	private int centipawnLoss;
-
-	@Column
-	private int depth;
 
 	public MoveEvaluationDo() {
 
 	}
 
-	public MoveEvaluationDo(String move, String nextFen, int evaluation, int centipawnLoss, int depth) {
+	public MoveEvaluationDo(String move, String nextFen) {
 		super();
 		this.move = move;
 		if (!Objects.isNull(nextFen)) {
@@ -43,9 +35,6 @@ public class MoveEvaluationDo {
 		}else {
 			this.nextShortFen = null;
 		}
-		this.evaluation = evaluation;
-		this.centipawnLoss = centipawnLoss;
-		this.depth = depth;
 	}
 
 	public String getMove() {
@@ -64,34 +53,9 @@ public class MoveEvaluationDo {
 		this.nextShortFen = nextShortFen;
 	}
 
-	public int getEvaluation() {
-		return evaluation;
-	}
-
-	public void setEvaluation(int evaluation) {
-		this.evaluation = evaluation;
-	}
-
-	public int getCentipawnLoss() {
-		return centipawnLoss;
-	}
-
-	public void setCentipawnLoss(int centipawnLoss) {
-		this.centipawnLoss = centipawnLoss;
-	}
-
-	public int getDepth() {
-		return depth;
-	}
-
-	public void setDepth(int depth) {
-		this.depth = depth;
-	}
-
 	@Override
 	public String toString() {
-		return "MoveEvaluationDo [id=" + id + ", move=" + move + ", fen=" + nextShortFen + ", evaluation=" + evaluation
-				+ ", centipawnLoss=" + centipawnLoss + ", depth=" + depth + "]";
+		return "MoveEvaluationDo [move=" + move + ", nextShortFen=" + nextShortFen + "]";
 	}
 
 }

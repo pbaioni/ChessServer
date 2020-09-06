@@ -31,7 +31,7 @@ public class StockfishService {
 	
 	private StockfishClient client;
 	
-	private int depth;
+	private int defaultDepth;
 	
 	public StockfishService() {
 
@@ -50,16 +50,21 @@ public class StockfishService {
 			        .setOption(Option.OwnBook, stockfishProperties.getOwnbook())
 			        .setVariant(Variant.DEFAULT)
 			        .build();
-			this.depth = Integer.parseInt(stockfishProperties.getDepth());
+			this.defaultDepth = Integer.parseInt(stockfishProperties.getDepth());
 		} catch (StockfishInitException e) {
 			LOGGER.error("Problem while creating stockfish client", e);
 		}
 	}
 
 
-	public EngineEvaluation getEngineEvaluation(String fen) {
+	public EngineEvaluation getEngineEvaluation(String fen, int targetDepth) {
+		if(Objects.isNull(targetDepth)) {
+			targetDepth = defaultDepth;
+		}
 		String stringEngineEvaluation = executeQuery(fen, QueryType.EngineEvaluation);
-		return new EngineEvaluation(stringEngineEvaluation, depth);
+		EngineEvaluation eval = new EngineEvaluation(stringEngineEvaluation, targetDepth);
+		LOGGER.info(eval.toString());
+		return eval;
 		
 	}
 	
@@ -71,7 +76,7 @@ public class StockfishService {
 		Awaitility.setDefaultTimeout(Duration.ofSeconds(60L));
         client.submit(new Query.Builder(type)
                 .setFen(fen)
-                .setDepth(depth)
+                .setDepth(defaultDepth)
                 .build(),
                 result -> atomicRval.set(result));
         Awaitility.await().atMost(Duration.ofSeconds(60L)).until(new Callable<Boolean>() {

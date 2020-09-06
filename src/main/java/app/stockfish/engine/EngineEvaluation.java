@@ -43,6 +43,11 @@ public class EngineEvaluation {
 
 	public void setDepth(int depth) {
 		this.depth = depth;
+	}
+
+	@Override
+	public String toString() {
+		return "EngineEvaluation [evaluation=" + evaluation + ", bestMove=" + bestMove + ", depth=" + depth + "]";
 	}	
 
 }
