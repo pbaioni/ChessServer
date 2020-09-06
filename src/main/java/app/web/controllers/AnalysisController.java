@@ -40,7 +40,6 @@ public class AnalysisController {
     
     @PostMapping("/delete")
     public String deleteLine(@RequestBody String deleteParameters) {
-    	System.out.println("Delete");
     	Gson g = new Gson();
     	DeleteParameters params = g.fromJson(deleteParameters, DeleteParameters.class);
     	return analysisService.deleteLine(params.getFen(), params.getMove());

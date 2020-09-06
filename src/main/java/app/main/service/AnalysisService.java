@@ -119,7 +119,6 @@ public class AnalysisService {
 
 	public String deleteLine(String fen, String move) {
 
-		LOGGER.info("Deleting move " + move + " for fen " + fen);
 		String rval = "";
 
 		// removing move evaluation from variant base
@@ -132,7 +131,8 @@ public class AnalysisService {
 			// removing all the lines linked to this move
 			deleteLine(findAnalysisInDb(moveToPrune.getNextShortFen()));
 
-			rval = "Line deleted";
+			rval = "Line " + move + " deleted from position ";
+			LOGGER.info(rval + fen);
 		} else {
 			rval = "Line not found";
 		}
