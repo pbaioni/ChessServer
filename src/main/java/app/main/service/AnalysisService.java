@@ -38,7 +38,7 @@ public class AnalysisService {
 	ObjectMapper mapper;
 
 	private static String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-	
+
 	private int updates;
 
 	public void init() {
@@ -187,18 +187,23 @@ public class AnalysisService {
 		analysisRepository.deleteAll();
 	}
 
-	public void updateDepth(int depth) {
+	public void updateDepth(String fen, int depth) {
 		updates = 0;
 		Instant start = Instant.now();
 		long entitiesToUpdate = analysisRepository.count();
 		LOGGER.info("Starting analysis update to depth " + depth + " for " + entitiesToUpdate + " positions");
 
-		AnalysisDo startPosition = findAnalysisInDb(FenHelper.getShortFen(START_FEN));
+		AnalysisDo startPosition = findAnalysisInDb(FenHelper.getShortFen(fen));
 		updatePositionDepth(startPosition, depth);
 
 		Instant finish = Instant.now();
 		long seconds = Duration.between(start, finish).getSeconds();
-		LOGGER.info(updates + " positions updated in " + seconds + " seconds [average: " + seconds/updates + " seconds per position");
+		if (updates != 0) {
+			LOGGER.info(updates + " positions updated in " + seconds + " seconds [average: " + seconds / updates
+					+ " seconds per position");
+		}else {
+			LOGGER.info("No positions to update");
+		}
 	}
 
 	private void updatePositionDepth(AnalysisDo position, int depth) {

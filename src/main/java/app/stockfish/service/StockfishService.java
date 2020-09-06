@@ -61,25 +61,25 @@ public class StockfishService {
 		if(Objects.isNull(targetDepth)) {
 			targetDepth = defaultDepth;
 		}
-		String stringEngineEvaluation = executeQuery(fen, QueryType.EngineEvaluation);
+		String stringEngineEvaluation = executeQuery(fen, QueryType.EngineEvaluation, targetDepth);
 		EngineEvaluation eval = new EngineEvaluation(stringEngineEvaluation, targetDepth);
 		LOGGER.info(eval.toString());
 		return eval;
 		
 	}
 	
-	private String executeQuery(String fen, QueryType type) {
+	private String executeQuery(String fen, QueryType type, int targetDepth) {
 		
 		AtomicReference<String> atomicRval = new AtomicReference<>();
 		Awaitility.setDefaultPollInterval(1000, TimeUnit.MILLISECONDS);
 		Awaitility.setDefaultPollDelay(Duration.ZERO);
-		Awaitility.setDefaultTimeout(Duration.ofSeconds(60L));
+		Awaitility.setDefaultTimeout(Duration.ofSeconds(300L));
         client.submit(new Query.Builder(type)
                 .setFen(fen)
-                .setDepth(defaultDepth)
+                .setDepth(targetDepth)
                 .build(),
                 result -> atomicRval.set(result));
-        Awaitility.await().atMost(Duration.ofSeconds(60L)).until(new Callable<Boolean>() {
+        Awaitility.await().atMost(Duration.ofSeconds(300L)).until(new Callable<Boolean>() {
 			
 			@Override
 			public Boolean call() throws Exception {

@@ -45,5 +45,13 @@ public class AnalysisController {
     	return analysisService.deleteLine(params.getFen(), params.getMove());
 
     }
+    
+    @PostMapping("/update")
+    public void updateDepth(@RequestBody String updateParameters) {
+    	Gson g = new Gson();
+    	UpdateParameters params = g.fromJson(updateParameters, UpdateParameters.class);
+    	analysisService.updateDepth(params.getFen(), Integer.parseInt(params.getDepth()));
+
+    }
 	
 }
