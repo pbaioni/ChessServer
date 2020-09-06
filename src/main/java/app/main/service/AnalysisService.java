@@ -1,5 +1,7 @@
 package app.main.service;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,13 +37,16 @@ public class AnalysisService {
 	@Autowired
 	ObjectMapper mapper;
 
+	private static String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+	
+	private int updates;
+
 	public void init() {
 		stockfishService.init();
 
 		// empty database, setting start position
 		if (analysisRepository.count() == 0L) {
-			String startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-			AnalysisDo analysis = new AnalysisDo(startFen);
+			AnalysisDo analysis = new AnalysisDo(START_FEN);
 			analysis.setBestMove("e2e4");
 			analysis.setEvaluation(20);
 			analysis.setDepth(24);
@@ -71,10 +76,7 @@ public class AnalysisService {
 			nextPosition = new AnalysisDo(nextFen);
 			LOGGER.info("No result from database, performing analysis for fen: " + nextFen);
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(nextFen, depth);
-	
-			nextPosition.setBestMove(engineEvaluation.getBestMove());
-			nextPosition.setEvaluation(engineEvaluation.getEvaluation());
-			nextPosition.setDepth(depth);
+			nextPosition.setEngineEvaluation(engineEvaluation);
 			LOGGER.debug("NextCalculated: " + nextPosition.toString());
 			if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
 				AnalysisDo currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
@@ -88,9 +90,9 @@ public class AnalysisService {
 			}
 		}
 
-	AnalysisDTO analysis = mapToDto(nextPosition);
+		AnalysisDTO analysis = mapToDto(nextPosition);
 
-	return wrapResponse(analysis);
+		return wrapResponse(analysis);
 
 	}
 
@@ -185,7 +187,31 @@ public class AnalysisService {
 		analysisRepository.deleteAll();
 	}
 
-	public void updateDepth(String string) {
+	public void updateDepth(int depth) {
+		updates = 0;
+		Instant start = Instant.now();
+		long entitiesToUpdate = analysisRepository.count();
+		LOGGER.info("Starting analysis update to depth " + depth + " for " + entitiesToUpdate + " positions");
+
+		AnalysisDo startPosition = findAnalysisInDb(FenHelper.getShortFen(START_FEN));
+		updatePositionDepth(startPosition, depth);
+
+		Instant finish = Instant.now();
+		long seconds = Duration.between(start, finish).getSeconds();
+		LOGGER.info(updates + " positions updated in " + seconds + " seconds [average: " + seconds/updates + " seconds per position");
+	}
+
+	private void updatePositionDepth(AnalysisDo position, int depth) {
+
+		if (position.getDepth() < depth) {
+			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(position.getFen(), depth);
+			position.setEngineEvaluation(engineEvaluation);
+			analysisRepository.save(position);
+			updates++;
+		}
+		for (MoveEvaluationDo move : position.getMoves()) {
+			updatePositionDepth(findAnalysisInDb(move.getNextShortFen()), depth);
+		}
 
 	}
 

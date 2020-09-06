@@ -149,6 +149,12 @@ public class AnalysisDo {
 		}
 		return rval;
 	}
+	
+	public void setEngineEvaluation(EngineEvaluation eval) {
+		this.setBestMove(eval.getBestMove());
+		this.setEvaluation(eval.getEvaluation());
+		this.setDepth(eval.getDepth());
+	}
 
 	@Override
 	public String toString() {
