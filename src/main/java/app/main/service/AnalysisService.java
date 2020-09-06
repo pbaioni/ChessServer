@@ -98,7 +98,7 @@ public class AnalysisService {
 
 	private AnalysisDTO mapToDto(AnalysisDo Do) {
 
-		AnalysisDTO analysis = new AnalysisDTO(Do.getFen(), Do.getTurn(), Do.getDepth());
+		AnalysisDTO analysis = new AnalysisDTO(Do.getFen(), Do.getTurn(), Do.getDepth(), Do.getComment());
 		for (MoveEvaluationDo move : Do.getMoves()) {
 			analysis.addMove(move.getMove(), findAnalysisInDb(move.getNextShortFen()).getEvaluation());
 		}
@@ -218,6 +218,15 @@ public class AnalysisService {
 			updatePositionDepth(findAnalysisInDb(move.getNextShortFen()), depth);
 		}
 
+	}
+	
+	public String setComment(String fen, String comment) {
+		
+		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
+		analysis.setComment(comment);
+		analysisRepository.save(analysis);
+		return "Comment set!";
+		
 	}
 
 }

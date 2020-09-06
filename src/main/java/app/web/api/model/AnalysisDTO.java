@@ -16,16 +16,19 @@ public class AnalysisDTO {
 	private int depth;
 
 	private List<MoveEvaluationDTO> moves = new ArrayList<MoveEvaluationDTO>();
+	
+	private String comment;
 
 	public AnalysisDTO() {
 
 	}
 
-	public AnalysisDTO(String fen, String turn, int depth) {
+	public AnalysisDTO(String fen, String turn, int depth, String comment) {
 		super();
 		this.fen = fen;
 		this.turn = turn;
 		this.depth = depth;
+		this.comment = comment;
 	}
 
 	public int getEvaluation() {
@@ -54,6 +57,14 @@ public class AnalysisDTO {
 
 	public List<MoveEvaluationDTO> getMoves() {
 		return moves;
+	}
+	
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	public void addMove(String move, int evaluation) {
@@ -107,7 +118,7 @@ public class AnalysisDTO {
 	@Override
 	public String toString() {
 		return "AnalysisDTO [fen=" + fen + ", turn=" + turn + ", evaluation=" + evaluation + ", bestMove=" + bestMove
-				+ ", moves=" + moves + "]";
+				+ ", depth=" + depth + ", moves=" + moves + ", comment=" + comment + "]";
 	}
 
 }
