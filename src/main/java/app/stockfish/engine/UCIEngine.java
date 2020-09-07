@@ -95,7 +95,7 @@ abstract class UCIEngine {
 
 	private String getPath(Variant variant, String override) {
 		StringBuilder path = new StringBuilder(
-				override == null ? "assets/engines/stockfish_10_x64" : override + "stockfish-10-64");
+				override == null ? "assets/engines/stockfish_10_x64" : override + "stockfish");
 
 		if (System.getProperty("os.name").toLowerCase().contains("win"))
 			switch (variant) {
@@ -124,6 +124,8 @@ abstract class UCIEngine {
 			default:
 				throw new StockfishEngineException("Illegal variant provided.");
 			}
+		
+		System.out.println(path.toString());
 
 		return path.toString();
 	}

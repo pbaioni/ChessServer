@@ -187,14 +187,14 @@ public class AnalysisService {
 		analysisRepository.deleteAll();
 	}
 
-	public void updateDepth(String fen, int depth) {
+	public void updateDepth(String fen, int depth, boolean forceUpdate) {
 		updates = 0;
 		Instant start = Instant.now();
 		long entitiesToUpdate = analysisRepository.count();
 		LOGGER.info("Starting analysis update to depth " + depth + " for " + entitiesToUpdate + " positions");
 
 		AnalysisDo startPosition = findAnalysisInDb(FenHelper.getShortFen(fen));
-		updatePositionDepth(startPosition, depth);
+		updatePositionDepth(startPosition, depth, forceUpdate);
 
 		Instant finish = Instant.now();
 		long seconds = Duration.between(start, finish).getSeconds();
@@ -206,16 +206,16 @@ public class AnalysisService {
 		}
 	}
 
-	private void updatePositionDepth(AnalysisDo position, int depth) {
+	private void updatePositionDepth(AnalysisDo position, int depth, boolean forceUpdate) {
 
-		if (position.getDepth() < depth) {
+		if (position.getDepth() < depth || forceUpdate) {
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(position.getFen(), depth);
 			position.setEngineEvaluation(engineEvaluation);
 			analysisRepository.save(position);
 			updates++;
 		}
 		for (MoveEvaluationDo move : position.getMoves()) {
-			updatePositionDepth(findAnalysisInDb(move.getNextShortFen()), depth);
+			updatePositionDepth(findAnalysisInDb(move.getNextShortFen()), depth, forceUpdate);
 		}
 
 	}

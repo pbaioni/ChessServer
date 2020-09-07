@@ -110,7 +110,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				analysisService.init();
 				break;
 			case "updateDepth":
-				analysisService.updateDepth("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Integer.parseInt(arguments.get(0)));
+				analysisService.updateDepth("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Integer.parseInt(arguments.get(0)), Boolean.parseBoolean(arguments.get(1)));
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");
