@@ -2,6 +2,7 @@ package app.main.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,6 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.bhlangonijr.chesslib.Board;
+import com.github.bhlangonijr.chesslib.game.Game;
+import com.github.bhlangonijr.chesslib.move.Move;
+import com.github.bhlangonijr.chesslib.move.MoveList;
+import com.github.bhlangonijr.chesslib.pgn.PgnHolder;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
@@ -227,6 +233,38 @@ public class AnalysisService {
 		analysisRepository.save(analysis);
 		return "Comment set!";
 		
+	}
+	
+	public void fillDatabaseFromPGN() throws Exception {
+		
+		//import values
+		int openingDepth = 12; //gives a 7 depth
+		int analysisDepth = 24;
+		
+		//load pgn games from file
+	    PgnHolder pgn = new PgnHolder("./src/main/resources/pgn/all.pgn");
+	    pgn.loadPgn();
+	    
+	    //browse the imported games
+	    List<Game> games = pgn.getGame();
+	    for (Game game: games) {
+	    	LOGGER.info("Game #" + (games.indexOf(game)+1) + ", opening: " + game.getEco());
+	        game.loadMoveText();
+	        MoveList moves = game.getHalfMoves();
+	        Board board = new Board();
+	        
+	        //searching for unanalized moves in the opening
+	        for (int i = 0; i<=openingDepth; i++) {
+	        	Move move = moves.get(i);
+	        	String previousFen = board.getFen();
+	        	String uciMove = (move.getFrom().name() + move.getTo().name()).toLowerCase();
+	            board.doMove(move);
+	            String nextFen = board.getFen();
+
+	            performAnalysis(previousFen, uciMove, nextFen, analysisDepth);
+	        }
+
+	    }
 	}
 
 }

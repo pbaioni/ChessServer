@@ -124,8 +124,6 @@ abstract class UCIEngine {
 			default:
 				throw new StockfishEngineException("Illegal variant provided.");
 			}
-		
-		System.out.println(path.toString());
 
 		return path.toString();
 	}

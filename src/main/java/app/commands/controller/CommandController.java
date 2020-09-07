@@ -28,7 +28,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 
 	@Autowired
 	CommandProperties properties;
-	
+
 	boolean runCommands;
 
 	public CommandController() {
@@ -46,7 +46,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 	}
 
 	private void launchCommands() {
-		
+
 		BufferedReader br = null;
 
 		try {
@@ -54,7 +54,6 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 			br = new BufferedReader(new InputStreamReader(System.in));
 			LOGGER.info("Commands : ");
 			LOGGER.info("q : quit");
-
 
 			runCommands = true;
 			while (runCommands) {
@@ -103,14 +102,19 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				this.destroy();
 				break;
 			case "move":
-				analysisService.performAnalysis("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", arguments.get(0), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", 24);
+				analysisService.performAnalysis("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+						arguments.get(0), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", 24);
 				break;
 			case "dropall":
 				analysisService.dropAll();
 				analysisService.init();
 				break;
 			case "updateDepth":
-				analysisService.updateDepth("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Integer.parseInt(arguments.get(0)), Boolean.parseBoolean(arguments.get(1)));
+				analysisService.updateDepth("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+						Integer.parseInt(arguments.get(0)), Boolean.parseBoolean(arguments.get(1)));
+				break;
+			case "import":
+				analysisService.fillDatabaseFromPGN();
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");
