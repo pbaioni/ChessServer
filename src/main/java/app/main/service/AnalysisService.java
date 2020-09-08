@@ -1,5 +1,7 @@
 package app.main.service;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -207,7 +209,7 @@ public class AnalysisService {
 		if (updates != 0) {
 			LOGGER.info(updates + " positions updated in " + seconds + " seconds [average: " + seconds / updates
 					+ " seconds per position");
-		}else {
+		} else {
 			LOGGER.info("No positions to update");
 		}
 	}
@@ -225,46 +227,63 @@ public class AnalysisService {
 		}
 
 	}
-	
+
 	public String setComment(String fen, String comment) {
-		
+
 		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
 		analysis.setComment(comment);
 		analysisRepository.save(analysis);
 		return "Comment set!";
-		
+
 	}
-	
+
 	public void fillDatabaseFromPGN() throws Exception {
-		
-		//import values
-		int openingDepth = 12; //gives a 7 depth
+
+		// import values
+		int openingDepth = 12; // gives a 7 depth
 		int analysisDepth = 24;
-		
-		//load pgn games from file
-	    PgnHolder pgn = new PgnHolder("./src/main/resources/pgn/all.pgn");
-	    pgn.loadPgn();
-	    
-	    //browse the imported games
-	    List<Game> games = pgn.getGame();
-	    for (Game game: games) {
-	    	LOGGER.info("Game #" + (games.indexOf(game)+1) + ", opening: " + game.getEco());
-	        game.loadMoveText();
-	        MoveList moves = game.getHalfMoves();
-	        Board board = new Board();
-	        
-	        //searching for unanalized moves in the opening
-	        for (int i = 0; i<=openingDepth; i++) {
-	        	Move move = moves.get(i);
-	        	String previousFen = board.getFen();
-	        	String uciMove = (move.getFrom().name() + move.getTo().name()).toLowerCase();
-	            board.doMove(move);
-	            String nextFen = board.getFen();
+		int plies;
 
-	            performAnalysis(previousFen, uciMove, nextFen, analysisDepth);
-	        }
+		File dir = new File("./import/");
+		File[] pgnFiles = dir.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".pgn");
+			}
+		});
 
-	    }
+		for (File pgnToLoad : pgnFiles) {
+			
+			LOGGER.info("Loading pgn file: " + pgnToLoad.getName());
+			// load pgn games from file
+			PgnHolder pgn = new PgnHolder(pgnToLoad.getAbsolutePath());
+			pgn.loadPgn();
+
+			// browse the imported games
+			List<Game> games = pgn.getGame();
+			for (Game game : games) {
+				LOGGER.info("Game #" + (games.indexOf(game) + 1) + ", opening: " + game.getEco());
+				game.loadMoveText();
+				MoveList moves = game.getHalfMoves();
+				Board board = new Board();
+				if (moves.size() >= openingDepth + 1) {
+					plies = openingDepth;
+				} else {
+					plies = moves.size() - 1;
+				}
+
+				// searching for unanalized moves in the opening
+				for (int i = 0; i <= plies; i++) {
+					Move move = moves.get(i);
+					String previousFen = board.getFen();
+					String uciMove = (move.getFrom().name() + move.getTo().name()).toLowerCase();
+					board.doMove(move);
+					String nextFen = board.getFen();
+
+					performAnalysis(previousFen, uciMove, nextFen, analysisDepth);
+				}
+
+			}
+		}
 	}
 
 }
