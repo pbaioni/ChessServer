@@ -237,11 +237,8 @@ public class AnalysisService {
 
 	}
 
-	public void fillDatabaseFromPGN() throws Exception {
+	public String fillDatabaseFromPGN(int openingDepth, int analysisDepth) throws Exception {
 
-		// import values
-		int openingDepth = 12; // gives a 7 depth
-		int analysisDepth = 24;
 		int plies;
 
 		File dir = new File("./import/");
@@ -284,6 +281,8 @@ public class AnalysisService {
 
 			}
 		}
+		
+		return wrapResponse(new SimpleResponseWrapper("Import completed"));
 	}
 
 }

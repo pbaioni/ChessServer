@@ -55,9 +55,19 @@ public class AnalysisController {
 
 	@PostMapping("/comment")
 	public String setComment(@RequestBody String commentParameters) {
+		System.out.println("comment");
 		Gson g = new Gson();
 		CommentParameters params = g.fromJson(commentParameters, CommentParameters.class);
 		return analysisService.setComment(params.getFen(), params.getComment());
+
+	}
+	
+	@PostMapping("/import")
+	public String importGames(@RequestBody String importParameters) throws Exception {
+		System.out.println("import");
+		Gson g = new Gson();
+		ImportParameters params = g.fromJson(importParameters, ImportParameters.class);
+		return analysisService.fillDatabaseFromPGN(Integer.parseInt(params.getOpeningDepth()), Integer.parseInt(params.getAnalysisDepth()));
 
 	}
 

@@ -101,10 +101,6 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				LOGGER.info("In line commands stopped!");
 				this.destroy();
 				break;
-			case "move":
-				analysisService.performAnalysis("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-						arguments.get(0), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", 24);
-				break;
 			case "dropall":
 				analysisService.dropAll();
 				analysisService.init();
@@ -114,7 +110,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 						Integer.parseInt(arguments.get(0)), Boolean.parseBoolean(arguments.get(1)));
 				break;
 			case "import":
-				analysisService.fillDatabaseFromPGN();
+				analysisService.fillDatabaseFromPGN(Integer.parseInt(arguments.get(0)), Integer.parseInt(arguments.get(1)));
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");
