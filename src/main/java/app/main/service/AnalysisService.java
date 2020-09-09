@@ -15,11 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.bhlangonijr.chesslib.Board;
-import com.github.bhlangonijr.chesslib.game.Game;
-import com.github.bhlangonijr.chesslib.move.Move;
-import com.github.bhlangonijr.chesslib.move.MoveList;
-import com.github.bhlangonijr.chesslib.pgn.PgnHolder;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
@@ -30,6 +25,12 @@ import app.stockfish.service.StockfishService;
 import app.web.api.model.AnalysisDTO;
 import app.web.api.model.MoveEvaluationDTO;
 import app.web.api.model.SimpleResponseWrapper;
+import pbaioni.chesslib.Board;
+import pbaioni.chesslib.game.Game;
+import pbaioni.chesslib.move.Move;
+import pbaioni.chesslib.move.MoveList;
+import pbaioni.chesslib.pgn.PgnHolder;
+
 
 @Service
 public class AnalysisService {
