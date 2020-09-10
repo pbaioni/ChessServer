@@ -65,7 +65,6 @@ public class AnalysisDTO {
 	}
 
 	public void setInfluences(Influence influence) {
-		System.out.println(influence.toString());
 		for (Square square : influence.getInfluence().keySet()) {
 			this.influences.add(new InfluenceDTO(square.name().toLowerCase(), Integer.toString(influence.getInfluence().get(square))));
 		}

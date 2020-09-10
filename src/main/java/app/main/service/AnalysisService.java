@@ -34,7 +34,6 @@ import pbaioni.chesslib.move.Move;
 import pbaioni.chesslib.move.MoveList;
 import pbaioni.chesslib.pgn.PgnHolder;
 
-
 @Service
 public class AnalysisService {
 
@@ -52,6 +51,8 @@ public class AnalysisService {
 	private static String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 	private int updates;
+
+	private boolean stopTask = false;
 
 	public void init() {
 		stockfishService.init();
@@ -106,10 +107,9 @@ public class AnalysisService {
 		Board board = new Board();
 		board.loadFromFen(nextFen);
 		analysis.setInfluences(board.getInfluence());
-		
+
 		Gson g = new Gson();
 		return g.toJson(analysis);
-
 
 	}
 
@@ -207,8 +207,7 @@ public class AnalysisService {
 	public void updateDepth(String fen, int depth, boolean forceUpdate) {
 		updates = 0;
 		Instant start = Instant.now();
-		long entitiesToUpdate = analysisRepository.count();
-		LOGGER.info("Starting analysis update to depth " + depth + " for " + entitiesToUpdate + " positions");
+		LOGGER.info("Starting line update to depth " + depth);
 
 		AnalysisDo startPosition = findAnalysisInDb(FenHelper.getShortFen(fen));
 		updatePositionDepth(startPosition, depth, forceUpdate);
@@ -221,18 +220,22 @@ public class AnalysisService {
 		} else {
 			LOGGER.info("No positions to update");
 		}
+
+		stopTask = false;
 	}
 
 	private void updatePositionDepth(AnalysisDo position, int depth, boolean forceUpdate) {
 
-		if (position.getDepth() < depth || forceUpdate) {
-			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(position.getFen(), depth);
-			position.setEngineEvaluation(engineEvaluation);
-			analysisRepository.save(position);
-			updates++;
-		}
-		for (MoveEvaluationDo move : position.getMoves()) {
-			updatePositionDepth(findAnalysisInDb(move.getNextShortFen()), depth, forceUpdate);
+		if (!stopTask) {
+			if (position.getDepth() < depth || forceUpdate) {
+				EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(position.getFen(), depth);
+				position.setEngineEvaluation(engineEvaluation);
+				analysisRepository.save(position);
+				updates++;
+			}
+			for (MoveEvaluationDo move : position.getMoves()) {
+				updatePositionDepth(findAnalysisInDb(move.getNextShortFen()), depth, forceUpdate);
+			}
 		}
 
 	}
@@ -258,7 +261,7 @@ public class AnalysisService {
 		});
 
 		for (File pgnToLoad : pgnFiles) {
-			
+
 			LOGGER.info("Loading pgn file: " + pgnToLoad.getName());
 			// load pgn games from file
 			PgnHolder pgn = new PgnHolder(pgnToLoad.getAbsolutePath());
@@ -267,31 +270,43 @@ public class AnalysisService {
 			// browse the imported games
 			List<Game> games = pgn.getGame();
 			for (Game game : games) {
-				LOGGER.info("Game #" + (games.indexOf(game) + 1) + ", opening: " + game.getEco());
-				game.loadMoveText();
-				MoveList moves = game.getHalfMoves();
-				Board board = new Board();
-				if (moves.size() >= openingDepth + 1) {
-					plies = openingDepth;
-				} else {
-					plies = moves.size() - 1;
-				}
+				if (!stopTask) {
+					LOGGER.info("Game #" + (games.indexOf(game) + 1) + ", opening: " + game.getEco());
+					game.loadMoveText();
+					MoveList moves = game.getHalfMoves();
+					Board board = new Board();
+					if (moves.size() >= 2*openingDepth) {
+						plies = 2*openingDepth - 2;
+					} else {
+						plies = moves.size() - 1;
+					}
 
-				// searching for unanalized moves in the opening
-				for (int i = 0; i <= plies; i++) {
-					Move move = moves.get(i);
-					String previousFen = board.getFen();
-					String uciMove = (move.getFrom().name() + move.getTo().name()).toLowerCase();
-					board.doMove(move);
-					String nextFen = board.getFen();
-
-					performAnalysis(previousFen, uciMove, nextFen, analysisDepth);
+					// searching for unanalized moves in the opening
+					for (int i = 0; i <= plies; i++) {
+						Move move = moves.get(i);
+						String previousFen = board.getFen();
+						String uciMove = (move.getFrom().name() + move.getTo().name()).toLowerCase();
+						board.doMove(move);
+						String nextFen = board.getFen();
+						if (!stopTask) {
+							performAnalysis(previousFen, uciMove, nextFen, analysisDepth);
+						}
+					}
 				}
 
 			}
 		}
 		
+		stopTask = false;
+		
 		return wrapResponse(new SimpleResponseWrapper("Import completed"));
+	}
+
+	public void stopTask() {
+
+		LOGGER.info("Stopping task");
+		this.stopTask = true;
+		stockfishService.cancel();
 	}
 
 }

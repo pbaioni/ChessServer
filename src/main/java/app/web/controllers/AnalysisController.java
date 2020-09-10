@@ -42,7 +42,6 @@ public class AnalysisController {
 		Gson g = new Gson();
 		DeleteParameters params = g.fromJson(deleteParameters, DeleteParameters.class);
 		return analysisService.deleteLine(params.getFen(), params.getMove());
-
 	}
 
 	@PostMapping("/update")
@@ -50,25 +49,25 @@ public class AnalysisController {
 		Gson g = new Gson();
 		UpdateParameters params = g.fromJson(updateParameters, UpdateParameters.class);
 		analysisService.updateDepth(params.getFen(), Integer.parseInt(params.getDepth()), false);
-
 	}
 
 	@PostMapping("/comment")
 	public String setComment(@RequestBody String commentParameters) {
-		System.out.println("comment");
 		Gson g = new Gson();
 		CommentParameters params = g.fromJson(commentParameters, CommentParameters.class);
 		return analysisService.setComment(params.getFen(), params.getComment());
-
 	}
 	
 	@PostMapping("/import")
 	public String importGames(@RequestBody String importParameters) throws Exception {
-		System.out.println("import");
 		Gson g = new Gson();
 		ImportParameters params = g.fromJson(importParameters, ImportParameters.class);
 		return analysisService.fillDatabaseFromPGN(Integer.parseInt(params.getOpeningDepth()), Integer.parseInt(params.getAnalysisDepth()));
-
+	}
+	
+	@GetMapping("/stop")
+	public void stopTask() throws Exception {
+		analysisService.stopTask();
 	}
 
 }

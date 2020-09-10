@@ -28,7 +28,7 @@ public class AnalysisDo {
 
 	@Column
 	private String fen;
-	
+
 	@Column
 	private String turn;
 
@@ -75,7 +75,7 @@ public class AnalysisDo {
 	public void setFen(String fen) {
 		this.fen = fen;
 	}
-	
+
 	public String getTurn() {
 		return turn;
 	}
@@ -149,11 +149,19 @@ public class AnalysisDo {
 		}
 		return rval;
 	}
-	
+
 	public void setEngineEvaluation(EngineEvaluation eval) {
-		this.setBestMove(eval.getBestMove());
-		this.setEvaluation(eval.getEvaluation());
-		this.setDepth(eval.getDepth());
+		if (!eval.isCanceled()) {
+			this.setBestMove(eval.getBestMove());
+			this.setEvaluation(eval.getEvaluation());
+			this.setDepth(eval.getDepth());
+		}else {
+			if(Objects.isNull(bestMove)) {
+				this.setBestMove(eval.getBestMove());
+				this.setEvaluation(eval.getEvaluation());
+				this.setDepth(0);
+			}
+		}
 	}
 
 	@Override

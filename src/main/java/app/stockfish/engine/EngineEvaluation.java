@@ -10,6 +10,8 @@ public class EngineEvaluation {
 	
 	private int depth;
 	
+	private boolean canceled;
+	
 	public EngineEvaluation() {
 		
 	}
@@ -19,6 +21,7 @@ public class EngineEvaluation {
 		this.evaluation = Integer.parseInt(splitEval[0].trim());
 		this.bestMove = splitEval[1].trim();
 		this.depth = depth;
+		this.canceled = stringEvaluation.contains("canceled");
 	}
 
 	public int getEvaluation() {
@@ -45,9 +48,18 @@ public class EngineEvaluation {
 		this.depth = depth;
 	}
 
+	public boolean isCanceled() {
+		return canceled;
+	}
+
+	public void setCanceled(boolean canceled) {
+		this.canceled = canceled;
+	}
+
 	@Override
 	public String toString() {
-		return "EngineEvaluation [evaluation=" + evaluation + ", bestMove=" + bestMove + ", depth=" + depth + "]";
-	}	
+		return "EngineEvaluation [evaluation=" + evaluation + ", bestMove=" + bestMove + ", depth=" + depth
+				+ ", canceled=" + canceled + "]";
+	}
 
 }

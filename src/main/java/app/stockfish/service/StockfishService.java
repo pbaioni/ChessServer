@@ -95,4 +95,11 @@ public class StockfishService {
 		client.stop();
 		
 	}
+
+
+	public void cancel() {
+		
+		client.cancel();
+		
+	}
 }

@@ -17,16 +17,18 @@ import app.stockfish.exceptions.StockfishInitException;
 
 public class StockfishClient {
 	private ExecutorService executor, callback;
-	private Queue<Stockfish> engines;
+	private Queue<Stockfish> availableEngines;
+	private Queue<Stockfish> busyEngines;
 
 	public StockfishClient(String path, int instances, Variant variant, Boolean ownBook, Set<Option> options)
 			throws StockfishInitException {
 		executor = Executors.newFixedThreadPool(instances);
 		callback = Executors.newSingleThreadExecutor();
-		engines = new ArrayBlockingQueue<Stockfish>(instances);
+		availableEngines = new ArrayBlockingQueue<Stockfish>(instances);
+		busyEngines = new ArrayBlockingQueue<Stockfish>(instances);
 
 		for (int i = 0; i < instances; i++) {
-			engines.add(new Stockfish(path, variant, ownBook, options.toArray(new Option[options.size()])));
+			availableEngines.add(new Stockfish(path, variant, ownBook, options.toArray(new Option[options.size()])));
 		}
 	}
 
@@ -36,7 +38,8 @@ public class StockfishClient {
 
 	public void submit(Query query, Consumer<String> result) {
 		executor.submit(() -> {
-			Stockfish engine = engines.remove();
+			Stockfish engine = availableEngines.remove();
+			busyEngines.add(engine);
 			String output;
 
 			switch (query.getType()) {
@@ -55,13 +58,14 @@ public class StockfishClient {
 			}
 
 			callback.submit(() -> result.accept(output));
-			engines.add(engine);
+			busyEngines.remove(engine);
+			availableEngines.add(engine);
 		});
 	}
 	
 	public void stop() {
 		int count = 1;
-		for(Stockfish s : engines) {
+		for(Stockfish s : availableEngines) {
 			try {
 				System.out.println("Stopping Stockfish engine #" + count);
 				s.close();
@@ -73,6 +77,19 @@ public class StockfishClient {
 		
 		executor.shutdownNow();
 		callback.shutdownNow();
+		
+	}
+	
+	public void cancel() {
+
+		for(Stockfish s : busyEngines) {
+			try {
+				s.cancel();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		
 	}
 

@@ -112,6 +112,9 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 			case "import":
 				analysisService.fillDatabaseFromPGN(Integer.parseInt(arguments.get(0)), Integer.parseInt(arguments.get(1)));
 				break;
+			case "stopTask":
+				analysisService.stopTask();
+				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");
 				break;

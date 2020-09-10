@@ -10,6 +10,9 @@ import app.stockfish.engine.enums.Variant;
 import app.stockfish.exceptions.StockfishInitException;
 
 public class Stockfish extends UCIEngine {
+	
+	boolean stop = false;
+	
 	public Stockfish(String path, Variant variant, Boolean ownBook, Option... options) throws StockfishInitException {
 		super(path, variant, ownBook, options);
 	}
@@ -47,6 +50,10 @@ public class Stockfish extends UCIEngine {
 
 		String absoluteEvaluation = calculateAbsoluteEvaluation(FenHelper.getTurn(query.getFen()), evaluation);
 		String rval = (absoluteEvaluation + separator + bestMove).trim();
+		if(stop) {
+			rval += separator + "canceled";
+			stop = false;
+		}
 		return rval;
 	}
 
@@ -75,6 +82,12 @@ public class Stockfish extends UCIEngine {
 			input.close();
 			output.close();
 		}
+	}
+	
+	public void cancel() throws IOException {
+		
+		stop = true;
+		sendCommand("stop");
 	}
 
 	private String getFen() {
