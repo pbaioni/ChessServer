@@ -77,7 +77,7 @@ public class AnalysisService {
 		return wrapResponse(new SimpleResponseWrapper(FenHelper.cleanPiecesFromFen(fen)));
 	}
 
-	public String performAnalysis(String currentFen, String move, String nextFen, int depth) {
+	public String performAnalysis(String currentFen, String move, String nextFen, Integer depth) {
 
 		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
 

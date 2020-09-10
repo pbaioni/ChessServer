@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:stockfish.properties")
+@PropertySource("classpath:application.properties")
 @ConfigurationProperties(prefix="stockfish")
 public class StockfishProperties {
 
@@ -13,7 +13,7 @@ public class StockfishProperties {
 	
 	private String threads;
 	
-	private String depth;
+	private String defaultDepth;
 	
 	private String skills;
 	
@@ -45,12 +45,12 @@ public class StockfishProperties {
 		this.threads = threads;
 	}
 
-	public String getDepth() {
-		return depth;
+	public String getDefaultDepth() {
+		return defaultDepth;
 	}
 
-	public void setDepth(String depth) {
-		this.depth = depth;
+	public void setDefaultDepth(String defaultDepth) {
+		this.defaultDepth = defaultDepth;
 	}
 
 	public String getSkills() {
@@ -95,9 +95,9 @@ public class StockfishProperties {
 
 	@Override
 	public String toString() {
-		return "StockfishProperties [instances=" + instances + ", threads=" + threads + ", depth=" + depth + ", skills="
-				+ skills + ", enginePath=" + enginePath + ", hash=" + hash + ", multipv=" + multipv + ", ownbook="
-				+ ownbook + "]";
+		return "StockfishProperties [instances=" + instances + ", threads=" + threads + ", defaultDepth=" + defaultDepth
+				+ ", skills=" + skills + ", enginePath=" + enginePath + ", hash=" + hash + ", multipv=" + multipv
+				+ ", ownbook=" + ownbook + "]";
 	}
 
 }

@@ -31,7 +31,7 @@ public class StockfishService {
 	
 	private StockfishClient client;
 	
-	private int defaultDepth;
+	private Integer defaultDepth;
 	
 	public StockfishService() {
 
@@ -50,14 +50,14 @@ public class StockfishService {
 			        .setOption(Option.OwnBook, stockfishProperties.getOwnbook())
 			        .setVariant(Variant.DEFAULT)
 			        .build();
-			this.defaultDepth = Integer.parseInt(stockfishProperties.getDepth());
+			this.defaultDepth = Integer.parseInt(stockfishProperties.getDefaultDepth());
 		} catch (StockfishInitException e) {
 			LOGGER.error("Problem while creating stockfish client", e);
 		}
 	}
 
 
-	public EngineEvaluation getEngineEvaluation(String fen, int targetDepth) {
+	public EngineEvaluation getEngineEvaluation(String fen, Integer targetDepth) {
 		if(Objects.isNull(targetDepth)) {
 			targetDepth = defaultDepth;
 		}

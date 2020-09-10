@@ -34,7 +34,7 @@ public class AnalysisController {
 	public String getAnalysis(@RequestBody String analysisParameters) {
 		Gson g = new Gson();
 		AnalysisParameters params = g.fromJson(analysisParameters, AnalysisParameters.class);
-		return analysisService.performAnalysis(params.getPreviousFen(), params.getMove(), params.getFen(), 24);
+		return analysisService.performAnalysis(params.getPreviousFen(), params.getMove(), params.getFen(), null);
 	}
 
 	@PostMapping("/delete")
