@@ -3,6 +3,9 @@ package app.web.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import pbaioni.chesslib.Square;
+import pbaioni.chesslib.move.Influence;
+
 public class AnalysisDTO {
 
 	private String fen;
@@ -12,11 +15,13 @@ public class AnalysisDTO {
 	private int evaluation;
 
 	private String bestMove;
-	
+
 	private int depth;
 
 	private List<MoveEvaluationDTO> moves = new ArrayList<MoveEvaluationDTO>();
-	
+
+	private List<InfluenceDTO> influences = new ArrayList<InfluenceDTO>();
+
 	private String comment;
 
 	public AnalysisDTO() {
@@ -58,7 +63,14 @@ public class AnalysisDTO {
 	public List<MoveEvaluationDTO> getMoves() {
 		return moves;
 	}
-	
+
+	public void setInfluences(Influence influence) {
+		System.out.println(influence.toString());
+		for (Square square : influence.getInfluence().keySet()) {
+			this.influences.add(new InfluenceDTO(square.name().toLowerCase(), Integer.toString(influence.getInfluence().get(square))));
+		}
+	}
+
 	public String getComment() {
 		return comment;
 	}
@@ -73,16 +85,16 @@ public class AnalysisDTO {
 		}
 		calculateBestMove();
 	}
-	
+
 	private boolean isMovePresent(String move) {
 		boolean rval = false;
-		for(MoveEvaluationDTO item : getMoves()) {
-			if(item.getMove().equals(move)) {
+		for (MoveEvaluationDTO item : getMoves()) {
+			if (item.getMove().equals(move)) {
 				rval = true;
 				break;
 			}
 		}
-		
+
 		return rval;
 	}
 
@@ -118,7 +130,7 @@ public class AnalysisDTO {
 	@Override
 	public String toString() {
 		return "AnalysisDTO [fen=" + fen + ", turn=" + turn + ", evaluation=" + evaluation + ", bestMove=" + bestMove
-				+ ", depth=" + depth + ", moves=" + moves + ", comment=" + comment + "]";
+				+ ", depth=" + depth + ", moves=" + moves + ", influences=" + influences + ", comment=" + comment + "]";
 	}
 
 }

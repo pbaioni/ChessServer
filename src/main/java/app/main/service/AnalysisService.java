@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
@@ -27,6 +28,8 @@ import app.web.api.model.MoveEvaluationDTO;
 import app.web.api.model.SimpleResponseWrapper;
 import pbaioni.chesslib.Board;
 import pbaioni.chesslib.game.Game;
+import pbaioni.chesslib.move.Influence;
+import pbaioni.chesslib.move.InfluenceGenerator;
 import pbaioni.chesslib.move.Move;
 import pbaioni.chesslib.move.MoveList;
 import pbaioni.chesslib.pgn.PgnHolder;
@@ -100,8 +103,13 @@ public class AnalysisService {
 		}
 
 		AnalysisDTO analysis = mapToDto(nextPosition);
+		Board board = new Board();
+		board.loadFromFen(nextFen);
+		analysis.setInfluences(board.getInfluence());
+		
+		Gson g = new Gson();
+		return g.toJson(analysis);
 
-		return wrapResponse(analysis);
 
 	}
 
