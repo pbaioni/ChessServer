@@ -204,7 +204,7 @@ public class AnalysisService {
 		analysisRepository.deleteAll();
 	}
 
-	public void updateDepth(String fen, int depth, boolean forceUpdate) {
+	public String updateDepth(String fen, int depth, boolean forceUpdate) {
 		updates = 0;
 		Instant start = Instant.now();
 		LOGGER.info("Starting line update to depth " + depth);
@@ -221,7 +221,12 @@ public class AnalysisService {
 			LOGGER.info("No positions to update");
 		}
 
-		stopTask = false;
+		if (stopTask) {
+			stopTask = false;
+			return wrapResponse(new SimpleResponseWrapper("Update Stopped"));
+		} else {
+			return wrapResponse(new SimpleResponseWrapper("Update completed"));
+		}
 	}
 
 	private void updatePositionDepth(AnalysisDo position, int depth, boolean forceUpdate) {
@@ -275,8 +280,8 @@ public class AnalysisService {
 					game.loadMoveText();
 					MoveList moves = game.getHalfMoves();
 					Board board = new Board();
-					if (moves.size() >= 2*openingDepth) {
-						plies = 2*openingDepth - 2;
+					if (moves.size() >= 2 * openingDepth) {
+						plies = 2 * openingDepth - 2;
 					} else {
 						plies = moves.size() - 1;
 					}
@@ -296,10 +301,13 @@ public class AnalysisService {
 
 			}
 		}
-		
-		stopTask = false;
-		
-		return wrapResponse(new SimpleResponseWrapper("Import completed"));
+
+		if (stopTask) {
+			stopTask = false;
+			return wrapResponse(new SimpleResponseWrapper("Import Stopped"));
+		} else {
+			return wrapResponse(new SimpleResponseWrapper("Import completed"));
+		}
 	}
 
 	public void stopTask() {

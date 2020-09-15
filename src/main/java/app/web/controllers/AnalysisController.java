@@ -45,10 +45,10 @@ public class AnalysisController {
 	}
 
 	@PostMapping("/update")
-	public void updateDepth(@RequestBody String updateParameters) {
+	public String updateDepth(@RequestBody String updateParameters) {
 		Gson g = new Gson();
 		UpdateParameters params = g.fromJson(updateParameters, UpdateParameters.class);
-		analysisService.updateDepth(params.getFen(), Integer.parseInt(params.getDepth()), false);
+		return analysisService.updateDepth(params.getFen(), Integer.parseInt(params.getDepth()), false);
 	}
 
 	@PostMapping("/comment")
