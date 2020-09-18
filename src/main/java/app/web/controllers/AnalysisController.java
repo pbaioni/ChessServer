@@ -36,6 +36,13 @@ public class AnalysisController {
 		AnalysisParameters params = g.fromJson(analysisParameters, AnalysisParameters.class);
 		return analysisService.performAnalysis(params.getPreviousFen(), params.getMove(), params.getFen(), null);
 	}
+	
+	@PostMapping("/drawing")
+	public void updateDrawings(@RequestBody String drawingParameters) {
+		Gson g = new Gson();
+		DrawingParameters params = g.fromJson(drawingParameters, DrawingParameters.class);
+		analysisService.updateDrawing(params.getFen(), params.getType(), params.getPath(), params.getColor());
+	}
 
 	@PostMapping("/delete")
 	public String deleteLine(@RequestBody String deleteParameters) {

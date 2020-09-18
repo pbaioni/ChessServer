@@ -2,7 +2,9 @@ package app.web.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import app.persistence.model.DrawingDo;
 import pbaioni.chesslib.Square;
 import pbaioni.chesslib.move.Influence;
 
@@ -21,6 +23,8 @@ public class AnalysisDTO {
 	private List<MoveEvaluationDTO> moves = new ArrayList<MoveEvaluationDTO>();
 
 	private List<InfluenceDTO> influences = new ArrayList<InfluenceDTO>();
+	
+	private List<DrawingDTO> drawings = new ArrayList<DrawingDTO>();
 
 	private String comment;
 
@@ -67,6 +71,12 @@ public class AnalysisDTO {
 	public void setInfluences(Influence influence) {
 		for (Square square : influence.getInfluence().keySet()) {
 			this.influences.add(new InfluenceDTO(square.name().toLowerCase(), Integer.toString(influence.getInfluence().get(square))));
+		}
+	}
+	
+	public void setDrawings(Set<DrawingDo> drawingsDo) {
+		for(DrawingDo drawingDo : drawingsDo) {
+			drawings.add(new DrawingDTO(drawingDo.getType(), drawingDo.getPath(), drawingDo.getColor()));
 		}
 	}
 
@@ -129,7 +139,8 @@ public class AnalysisDTO {
 	@Override
 	public String toString() {
 		return "AnalysisDTO [fen=" + fen + ", turn=" + turn + ", evaluation=" + evaluation + ", bestMove=" + bestMove
-				+ ", depth=" + depth + ", moves=" + moves + ", influences=" + influences + ", comment=" + comment + "]";
+				+ ", depth=" + depth + ", moves=" + moves + ", influences=" + influences + ", drawings=" + drawings
+				+ ", comment=" + comment + "]";
 	}
 
 }

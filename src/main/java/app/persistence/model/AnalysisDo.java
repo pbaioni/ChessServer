@@ -1,8 +1,9 @@
 package app.persistence.model;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -16,7 +17,6 @@ import javax.persistence.Table;
 
 import app.main.service.helper.FenHelper;
 import app.stockfish.engine.EngineEvaluation;
-import ch.qos.logback.core.pattern.color.BlackCompositeConverter;
 
 @Entity
 @Table(name = "analysis")
@@ -46,7 +46,11 @@ public class AnalysisDo {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
 	@CollectionTable(name = "moves", joinColumns = @JoinColumn(name = "move"))
-	private List<MoveEvaluationDo> moves;
+	private Set<MoveEvaluationDo> moves;
+
+	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+	@CollectionTable(name = "drawings", joinColumns = @JoinColumn(name = "drawing"))
+	private Set<DrawingDo> drawings;
 
 	public AnalysisDo() {
 		// NOTHING TO DO
@@ -56,7 +60,8 @@ public class AnalysisDo {
 		this.shortFen = FenHelper.getShortFen(fen);
 		this.fen = fen;
 		this.turn = FenHelper.getTurn(fen);
-		moves = new ArrayList<MoveEvaluationDo>();
+		moves = new HashSet<MoveEvaluationDo>();
+		drawings = new HashSet<DrawingDo>();
 		this.depth = 0;
 	}
 
@@ -82,14 +87,6 @@ public class AnalysisDo {
 
 	public void setTurn(String turn) {
 		this.turn = turn;
-	}
-
-	public List<MoveEvaluationDo> getMoves() {
-		return moves;
-	}
-
-	public void setMoves(List<MoveEvaluationDo> moves) {
-		this.moves = moves;
 	}
 
 	public int getEvaluation() {
@@ -124,6 +121,22 @@ public class AnalysisDo {
 		this.comment = comment;
 	}
 
+	public Set<MoveEvaluationDo> getMoves() {
+		return moves;
+	}
+
+	public void setMoves(Set<MoveEvaluationDo> moves) {
+		this.moves = moves;
+	}
+
+	public Set<DrawingDo> getDrawings() {
+		return drawings;
+	}
+
+	public void setDrawings(Set<DrawingDo> drawings) {
+		this.drawings = drawings;
+	}
+
 	public void addMove(MoveEvaluationDo move) {
 
 		moves.add(move);
@@ -155,13 +168,46 @@ public class AnalysisDo {
 			this.setBestMove(eval.getBestMove());
 			this.setEvaluation(eval.getEvaluation());
 			this.setDepth(eval.getDepth());
-		}else {
-			if(Objects.isNull(bestMove)) {
+		} else {
+			if (Objects.isNull(bestMove)) {
 				this.setBestMove(eval.getBestMove());
 				this.setEvaluation(eval.getEvaluation());
 				this.setDepth(0);
 			}
 		}
+	}
+
+	public void updateDrawing(String type, String path, String color) {
+
+		//recover drawing to update
+		DrawingDo drawingToUpdate = null;
+		for (DrawingDo drawing : drawings) {
+			if (drawing.getType().equals(type) && drawing.getPath().equals(path)) {
+				drawingToUpdate = drawing;
+				break;
+			}
+		}
+		
+		if (!Objects.isNull(drawingToUpdate)) {
+			
+			//update
+			if (Objects.isNull(color)) {
+				//remove
+				drawings.remove(drawingToUpdate);
+
+			} else {
+				// update color
+				drawingToUpdate.setColor(color);
+			}
+		}else {
+			
+			//add new drawing
+			drawings.add(new DrawingDo(type, path, color));
+		}
+	}
+
+	public void removeDrawing(DrawingDo drawing) {
+		drawings.remove(drawing);
 	}
 
 	@Override

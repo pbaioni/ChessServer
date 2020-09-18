@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
+import app.persistence.model.DrawingDo;
 import app.persistence.model.MoveEvaluationDo;
 import app.persistence.repo.AnalysisRepository;
 import app.stockfish.engine.EngineEvaluation;
@@ -131,6 +132,9 @@ public class AnalysisService {
 		if (!bestMoveMatch) {
 			analysis.addMove(Do.getBestMove(), Do.getEvaluation());
 		}
+		
+		analysis.setDrawings(Do.getDrawings());
+		
 		LOGGER.debug("DTO: " + analysis.toString());
 
 		return analysis;
@@ -315,6 +319,13 @@ public class AnalysisService {
 		LOGGER.info("Stopping task");
 		this.stopTask = true;
 		stockfishService.cancel();
+	}
+
+	public void updateDrawing(String fen, String type, String path, String color) {
+
+		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
+		analysis.updateDrawing(type, path, color);
+		analysisRepository.save(analysis);
 	}
 
 }
