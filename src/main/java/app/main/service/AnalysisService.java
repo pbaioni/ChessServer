@@ -273,7 +273,7 @@ public class AnalysisService {
 			pgn.loadPgn();
 
 			// browse the imported games
-			List<Game> games = pgn.getGame();
+			List<Game> games = pgn.getGames();
 			for (Game game : games) {
 				if (!stopTask) {
 					LOGGER.info("Game #" + (games.indexOf(game) + 1) + ", opening: " + game.getEco());
@@ -281,7 +281,7 @@ public class AnalysisService {
 					MoveList moves = game.getHalfMoves();
 					Board board = new Board();
 					if (moves.size() >= 2 * openingDepth) {
-						plies = 2 * openingDepth - 2;
+						plies = 2 * openingDepth - 1;
 					} else {
 						plies = moves.size() - 1;
 					}
