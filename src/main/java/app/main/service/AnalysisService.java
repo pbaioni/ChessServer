@@ -78,7 +78,7 @@ public class AnalysisService {
 		return wrapResponse(new SimpleResponseWrapper(FenHelper.cleanPiecesFromFen(fen)));
 	}
 
-	public String performAnalysis(String currentFen, String move, String nextFen, Integer depth) {
+	public String performAnalysis(String currentFen, String move, String nextFen, Integer depth, boolean useEngine) {
 
 		// adding move to current position if needed
 		if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
@@ -92,23 +92,27 @@ public class AnalysisService {
 				}
 			}
 		}
-		
+
 		// analysing new position if needed
 		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
-		if (!Objects.isNull(nextPosition)) {
-			// position from DB
+		if (!Objects.isNull(nextPosition) && depth <= nextPosition.getDepth()) {
+			// position found in DB
 			LOGGER.debug("Analysis fetched: " + nextPosition.toString());
 		} else {
-			// No result from DB, performing analysis
-			nextPosition = new AnalysisDo(nextFen);
-			LOGGER.info("No result from database, performing analysis for fen: " + nextFen);
-			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(nextFen, depth);
-			nextPosition.setEngineEvaluation(engineEvaluation);
+			// No result from DB, creating new analysis
+			if (Objects.isNull(nextPosition)) {
+				nextPosition = new AnalysisDo(nextFen);
+			}
+			if (useEngine) {
+				LOGGER.info("No result from database, performing analysis for fen: " + nextFen);
+				EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(nextFen, depth);
+				nextPosition.setEngineEvaluation(engineEvaluation);
+			}
 			analysisRepository.save(nextPosition);
 			LOGGER.info("New analysis linked to previous position and saved: " + nextPosition.toString());
 		}
 
-		//creating DTO object to return
+		// creating DTO object to return
 		AnalysisDTO analysis = mapToDto(nextPosition);
 		Board board = new Board();
 		board.loadFromFen(nextFen);
@@ -303,7 +307,7 @@ public class AnalysisService {
 						board.doMove(move);
 						String nextFen = board.getFen();
 						if (!stopTask) {
-							performAnalysis(previousFen, uciMove, nextFen, analysisDepth);
+							performAnalysis(previousFen, uciMove, nextFen, analysisDepth, true);
 						}
 					}
 				}
