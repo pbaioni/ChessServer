@@ -137,19 +137,27 @@ public class AnalysisDo {
 		this.drawings = drawings;
 	}
 
-	public void addMove(MoveEvaluationDo move) {
+	public boolean addMove(MoveEvaluationDo moveToAdd) {
 
-		moves.add(move);
+		MoveEvaluationDo moveStored = getEvaluationByMove(moveToAdd.getMove());
+		if (Objects.isNull(moveStored)) {
+			moves.add(moveToAdd);
+			return true;
+		}
+		
+		return false;
 
 	}
 
-	public void removeMove(String move) {
+	public boolean removeMove(String move) {
 
 		MoveEvaluationDo moveToPrune = getEvaluationByMove(move);
-
-		if (!Objects.isNull(move)) {
+		if (!Objects.isNull(moveToPrune)) {
 			moves.remove(moveToPrune);
+			return true;
 		}
+		
+		return false;
 
 	}
 
@@ -179,7 +187,7 @@ public class AnalysisDo {
 
 	public void updateDrawing(String type, String path, String color) {
 
-		//recover drawing to update
+		// recover drawing to update
 		DrawingDo drawingToUpdate = null;
 		for (DrawingDo drawing : drawings) {
 			if (drawing.getType().equals(type) && drawing.getPath().equals(path)) {
@@ -187,21 +195,21 @@ public class AnalysisDo {
 				break;
 			}
 		}
-		
+
 		if (!Objects.isNull(drawingToUpdate)) {
-			
-			//update
+
+			// update
 			if (Objects.isNull(color)) {
-				//remove
+				// remove
 				drawings.remove(drawingToUpdate);
 
 			} else {
 				// update color
 				drawingToUpdate.setColor(color);
 			}
-		}else {
-			
-			//add new drawing
+		} else {
+
+			// add new drawing
 			drawings.add(new DrawingDo(type, path, color));
 		}
 	}

@@ -80,8 +80,21 @@ public class AnalysisService {
 
 	public String performAnalysis(String currentFen, String move, String nextFen, Integer depth) {
 
+		// adding move to current position if needed
+		if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
+			AnalysisDo currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
+			MoveEvaluationDo newMove = new MoveEvaluationDo(move, nextFen);
+			LOGGER.debug("CurrentFetched: " + currentPosition.toString());
+			if (!Objects.isNull(currentPosition)) {
+				if (currentPosition.addMove(newMove)) {
+					LOGGER.debug("Current with move added: " + currentPosition.toString());
+					analysisRepository.save(currentPosition);
+				}
+			}
+		}
+		
+		// analysing new position if needed
 		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
-
 		if (!Objects.isNull(nextPosition)) {
 			// position from DB
 			LOGGER.debug("Analysis fetched: " + nextPosition.toString());
@@ -91,19 +104,11 @@ public class AnalysisService {
 			LOGGER.info("No result from database, performing analysis for fen: " + nextFen);
 			EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(nextFen, depth);
 			nextPosition.setEngineEvaluation(engineEvaluation);
-			LOGGER.debug("NextCalculated: " + nextPosition.toString());
-			if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
-				AnalysisDo currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
-				MoveEvaluationDo newMove = new MoveEvaluationDo(move, nextFen);
-				LOGGER.debug("CurrentFetched: " + currentPosition.toString());
-				currentPosition.addMove(newMove);
-				LOGGER.debug("CurrentEnd: " + currentPosition.toString());
-				analysisRepository.save(currentPosition);
-				analysisRepository.save(nextPosition);
-				LOGGER.info("New analysis linked to previous position and saved: " + nextPosition.toString());
-			}
+			analysisRepository.save(nextPosition);
+			LOGGER.info("New analysis linked to previous position and saved: " + nextPosition.toString());
 		}
 
+		//creating DTO object to return
 		AnalysisDTO analysis = mapToDto(nextPosition);
 		Board board = new Board();
 		board.loadFromFen(nextFen);
@@ -132,9 +137,9 @@ public class AnalysisService {
 		if (!bestMoveMatch) {
 			analysis.addMove(Do.getBestMove(), Do.getEvaluation());
 		}
-		
+
 		analysis.setDrawings(Do.getDrawings());
-		
+
 		LOGGER.debug("DTO: " + analysis.toString());
 
 		return analysis;
