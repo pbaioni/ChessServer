@@ -144,7 +144,7 @@ public class AnalysisDo {
 			moves.add(moveToAdd);
 			return true;
 		}
-		
+
 		return false;
 
 	}
@@ -156,7 +156,7 @@ public class AnalysisDo {
 			moves.remove(moveToPrune);
 			return true;
 		}
-		
+
 		return false;
 
 	}
@@ -208,9 +208,10 @@ public class AnalysisDo {
 				drawingToUpdate.setColor(color);
 			}
 		} else {
-
 			// add new drawing
-			drawings.add(new DrawingDo(type, path, color));
+			if (!Objects.isNull(color)) {
+				drawings.add(new DrawingDo(type, path, color));
+			}
 		}
 	}
 
