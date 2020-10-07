@@ -37,7 +37,6 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 
 	@Override
 	public void run(String... args) throws Exception {
-		LOGGER.info(properties.toString());
 		if (properties.isStart()) {
 			runCommands = true;
 			launchCommands();
@@ -48,21 +47,17 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 	private void launchCommands() {
 
 		BufferedReader br = null;
-
 		try {
 
 			br = new BufferedReader(new InputStreamReader(System.in));
-			LOGGER.info("Commands : ");
-			LOGGER.info("q : quit");
+			LOGGER.info("Implemented inline commands : ");
+			LOGGER.info("dropall : erase database");
+			LOGGER.info("q : quit inline commands");
 
 			runCommands = true;
 			while (runCommands) {
-
-				LOGGER.info("Enter command: ");
 				String input = br.readLine();
-
 				manageCommands(input);
-
 			}
 
 		} catch (IOException e) {
@@ -98,22 +93,13 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 
 			switch (command) {
 			case "q":
-				LOGGER.info("In line commands stopped!");
+				LOGGER.info("Inline commands stopped!");
 				this.destroy();
 				break;
 			case "dropall":
 				analysisService.dropAll();
+				LOGGER.info("Database clean");
 				analysisService.init();
-				break;
-			case "updateDepth":
-				analysisService.updateDepth("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-						Integer.parseInt(arguments.get(0)), Boolean.parseBoolean(arguments.get(1)));
-				break;
-			case "import":
-				analysisService.fillDatabaseFromPGN(Integer.parseInt(arguments.get(0)), Integer.parseInt(arguments.get(1)));
-				break;
-			case "stopTask":
-				analysisService.stopTask();
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");

@@ -24,8 +24,6 @@ public class Application implements ApplicationRunner, DisposableBean{
 	
 	
 	public void init() {
-		//app property example
-		LOGGER.info("Application property example: " + applicationProperties.getAppProperty());
 
 		//initializing services
 		analysisService.init();
