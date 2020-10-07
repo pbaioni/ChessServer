@@ -84,8 +84,8 @@ public class AnalysisService {
 		if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
 			AnalysisDo currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
 			MoveEvaluationDo newMove = new MoveEvaluationDo(move, nextFen);
-			LOGGER.debug("CurrentFetched: " + currentPosition.toString());
 			if (!Objects.isNull(currentPosition)) {
+				LOGGER.debug("CurrentFetched: " + currentPosition.toString());
 				if (currentPosition.addMove(newMove)) {
 					LOGGER.debug("Current with move added: " + currentPosition.toString());
 					analysisRepository.save(currentPosition);
