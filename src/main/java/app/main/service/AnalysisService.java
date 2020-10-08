@@ -89,6 +89,7 @@ public class AnalysisService {
 				if (currentPosition.addMove(newMove)) {
 					LOGGER.debug("Current with move added: " + currentPosition.toString());
 					analysisRepository.save(currentPosition);
+					LOGGER.info("Move " + move + " added to current position");
 				}
 			}
 		}
@@ -97,7 +98,7 @@ public class AnalysisService {
 		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
 		if (!Objects.isNull(nextPosition) && depth <= nextPosition.getDepth()) {
 			// position found in DB
-			LOGGER.debug("Analysis fetched: " + nextPosition.toString());
+			LOGGER.info("Analysis fetched: " + nextPosition.toString());
 		} else {
 			// No result from DB, creating new analysis
 			if (Objects.isNull(nextPosition)) {
@@ -109,7 +110,7 @@ public class AnalysisService {
 				nextPosition.setEngineEvaluation(engineEvaluation);
 			}
 			analysisRepository.save(nextPosition);
-			LOGGER.info("New analysis linked to previous position and saved: " + nextPosition.toString());
+			LOGGER.info("New analysis saved: " + nextPosition.toString());
 		}
 
 		// creating DTO object to return

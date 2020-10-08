@@ -52,6 +52,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 			br = new BufferedReader(new InputStreamReader(System.in));
 			LOGGER.info("Implemented inline commands : ");
 			LOGGER.info("dropall : erase database");
+			LOGGER.info("shutdown : stop server");
 			LOGGER.info("q : quit inline commands");
 
 			runCommands = true;
@@ -100,6 +101,9 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				analysisService.dropAll();
 				LOGGER.info("Database clean");
 				analysisService.init();
+				break;
+			case "shutdown":
+				LOGGER.info("Shutting down");
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");

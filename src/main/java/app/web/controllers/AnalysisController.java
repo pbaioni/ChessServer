@@ -1,5 +1,9 @@
 package app.web.controllers;
 
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +23,14 @@ public class AnalysisController {
 
 	@Autowired
 	private AnalysisService analysisService;
+	
+	private Timer shutdownTimer = new Timer();
 
 	@GetMapping
 	public String welcome() {
+		//cancelling shutdown task (browser refresh case)
+		shutdownTimer.cancel();
+		
 		return analysisService.welcome();
 	}
 
@@ -77,4 +86,19 @@ public class AnalysisController {
 		analysisService.stopTask();
 	}
 
+	@GetMapping("/shutdown")
+	public void shutdown() throws Exception {
+		
+		shutdownTimer = new Timer();
+		
+	    TimerTask task = new TimerTask() {
+	        public void run() {
+	        	System.exit(0);
+	        }
+	    };
+	    
+	    //setting a 3 seconds delay for shutdown in order to manage browser page refresh
+	    long delay = 3000L;
+	    shutdownTimer.schedule(task, delay);
+	}
 }
