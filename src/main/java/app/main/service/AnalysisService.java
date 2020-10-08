@@ -98,7 +98,7 @@ public class AnalysisService {
 		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
 		if (!Objects.isNull(nextPosition) && depth <= nextPosition.getDepth()) {
 			// position found in DB
-			LOGGER.info("Analysis fetched: " + nextPosition.toString());
+			LOGGER.debug("Analysis fetched: " + nextPosition.toString());
 		} else {
 			// No result from DB, creating new analysis
 			if (Objects.isNull(nextPosition)) {
