@@ -62,7 +62,7 @@ public class AnalysisService {
 		if (analysisRepository.count() == 0L) {
 			AnalysisDo analysis = new AnalysisDo(START_FEN);
 			analysis.setBestMove("e2e4");
-			analysis.setEvaluation(20);
+			analysis.setEvaluation("20");
 			analysis.setDepth(24);
 			analysisRepository.save(analysis);
 			LOGGER.info("Start position analysis saved: " + analysis.toString());

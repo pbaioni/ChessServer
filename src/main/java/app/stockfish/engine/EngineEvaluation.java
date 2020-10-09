@@ -4,7 +4,7 @@ public class EngineEvaluation {
 	
 	private static final String SEPARATOR = " ";
 	
-	private int evaluation;
+	private String evaluation;
 	
 	private String bestMove;
 	
@@ -18,17 +18,18 @@ public class EngineEvaluation {
 
 	public EngineEvaluation(String stringEvaluation, int depth) {
 		String[] splitEval = stringEvaluation.split(SEPARATOR);
-		this.evaluation = Integer.parseInt(splitEval[0].trim());
+		this.evaluation = splitEval[0].trim();
 		this.bestMove = splitEval[1].trim();
 		this.depth = depth;
 		this.canceled = stringEvaluation.contains("canceled");
+		System.out.println(this.toString());
 	}
 
-	public int getEvaluation() {
+	public String getEvaluation() {
 		return evaluation;
 	}
 
-	public void setEvaluation(int evaluation) {
+	public void setEvaluation(String evaluation) {
 		this.evaluation = evaluation;
 	}
 

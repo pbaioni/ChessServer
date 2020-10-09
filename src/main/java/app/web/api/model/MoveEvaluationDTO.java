@@ -4,11 +4,11 @@ public class MoveEvaluationDTO {
 	
 	private String move;
 	
-	private int evaluation;
+	private String evaluation;
 	
 	private int centipawnLoss;
 
-	public MoveEvaluationDTO(String move, int evaluation) {
+	public MoveEvaluationDTO(String move, String evaluation) {
 		super();
 		this.move = move;
 		this.evaluation = evaluation;
@@ -22,11 +22,11 @@ public class MoveEvaluationDTO {
 		this.move = move;
 	}
 
-	public int getEvaluation() {
+	public String getEvaluation() {
 		return evaluation;
 	}
 
-	public void setEvaluation(int evaluation) {
+	public void setEvaluation(String evaluation) {
 		this.evaluation = evaluation;
 	}
 

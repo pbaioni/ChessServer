@@ -14,7 +14,7 @@ public class AnalysisDTO {
 
 	private String turn;
 
-	private int evaluation;
+	private String evaluation;
 
 	private String bestMove;
 
@@ -40,11 +40,11 @@ public class AnalysisDTO {
 		this.comment = comment;
 	}
 
-	public int getEvaluation() {
+	public String getEvaluation() {
 		return evaluation;
 	}
 
-	public void setEvaluation(int evaluation) {
+	public void setEvaluation(String evaluation) {
 		this.evaluation = evaluation;
 	}
 
@@ -88,7 +88,7 @@ public class AnalysisDTO {
 		this.comment = comment;
 	}
 
-	public void addMove(String move, int evaluation) {
+	public void addMove(String move, String evaluation) {
 		if (!isMovePresent(move)) {
 			moves.add(new MoveEvaluationDTO(move, evaluation));
 		}
@@ -111,12 +111,13 @@ public class AnalysisDTO {
 		// looking for the best analyzed move
 		MoveEvaluationDTO bestEval = moves.get(0);
 		for (MoveEvaluationDTO eval : moves) {
+
 			if (turn.equals("b")) {
-				if (eval.getEvaluation() < bestEval.getEvaluation()) {
+				if (getIntEval(eval.getEvaluation()) < getIntEval(bestEval.getEvaluation())) {
 					bestEval = eval;
 				}
 			} else {
-				if (eval.getEvaluation() > bestEval.getEvaluation()) {
+				if (getIntEval(eval.getEvaluation()) > getIntEval(bestEval.getEvaluation())) {
 					bestEval = eval;
 				}
 			}
@@ -131,9 +132,35 @@ public class AnalysisDTO {
 		}
 		// updating centipawn losses
 		for (MoveEvaluationDTO eval : moves) {
-			eval.setCentipawnLoss(factor * bestEval.getEvaluation() - factor * eval.getEvaluation());
+			
+			int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation()) - (factor * getIntEval(eval.getEvaluation())));
+			if(centipawnLoss > 10000) {
+				centipawnLoss = 10000;
+			}
+			if(centipawnLoss < -10000) {
+				centipawnLoss = -10000;
+			}
+			
+			eval.setCentipawnLoss(centipawnLoss);
 		}
 
+	}
+	
+	private int getIntEval(String evaluation) {
+		
+		int intEval = 0;
+		if(evaluation.contains("#")) {
+			int movesToMate = Integer.parseInt(evaluation.substring(evaluation.lastIndexOf("#")+1, evaluation.length()));
+			intEval = -1000000 + movesToMate;
+			if(evaluation.contains("-")) {
+				intEval = intEval * (-1);
+			}
+		}else {
+			intEval = Integer.parseInt(evaluation);
+		}
+		
+		
+		return intEval;
 	}
 
 	@Override

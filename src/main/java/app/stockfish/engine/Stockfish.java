@@ -25,9 +25,6 @@ public class Stockfish extends UCIEngine {
 
 	public String getEngineEvaluation(Query query) {
 
-		String evaluation = "";
-		String bestMove = "";
-		String separator = " ";
 		waitForReady();
 		sendCommand("ucinewgame");
 		waitForReady();
@@ -43,18 +40,15 @@ public class Stockfish extends UCIEngine {
 
 		waitForReady();
 		sendCommand(command.toString());
-		List<String> response = readResponse("bestmove");
+		
+		String evaluation = readEvaluation(FenHelper.getTurn(query.getFen()));
 
-		evaluation = response.get(response.size() - 2).split("score cp")[1].trim().split(" ")[0];
-		bestMove = response.get(response.size() - 1).substring(9).split("\\s+")[0];
-
-		String absoluteEvaluation = calculateAbsoluteEvaluation(FenHelper.getTurn(query.getFen()), evaluation);
-		String rval = (absoluteEvaluation + separator + bestMove).trim();
 		if(stop) {
-			rval += separator + "canceled";
+			evaluation += " canceled";
 			stop = false;
 		}
-		return rval;
+		
+		return evaluation;
 	}
 
 	public String getLegalMoves(Query query) {
@@ -97,14 +91,4 @@ public class Stockfish extends UCIEngine {
 		return readLine("Fen: ").substring(5);
 	}
 
-	private String calculateAbsoluteEvaluation(String turn, String cpEval) {
-		
-		int intEval = Integer.parseInt(cpEval);
-
-		if (turn.equals("b")) {
-			intEval = intEval*(-1);
-		}
-
-		return Integer.toString(intEval);
-	}
 }

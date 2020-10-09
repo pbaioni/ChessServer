@@ -33,7 +33,7 @@ public class AnalysisDo {
 	private String turn;
 
 	@Column
-	private int evaluation;
+	private String evaluation;
 
 	@Column
 	private String bestMove;
@@ -89,11 +89,11 @@ public class AnalysisDo {
 		this.turn = turn;
 	}
 
-	public int getEvaluation() {
+	public String getEvaluation() {
 		return evaluation;
 	}
 
-	public void setEvaluation(int evaluation) {
+	public void setEvaluation(String evaluation) {
 		this.evaluation = evaluation;
 	}
 

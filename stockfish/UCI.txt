@@ -277,7 +277,7 @@ Engine to GUI:
 			the score from the engine's point of view in centipawns.
 		* mate 
 			mate in y moves, not plies.
-			If the engine is getting mated use negativ values for y.
+			If the engine is getting mated use negative values for y.
 		* lowerbound
 	      the score is just a lower bound.
 		* upperbound

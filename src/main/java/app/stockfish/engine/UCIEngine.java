@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,6 @@ abstract class UCIEngine {
 			while ((line = input.readLine()) != null) {
 				lines.add(line);
 				if (line.startsWith(expected)) {
-					LOGGER.debug("Read response: " + line);
 					break;
 				}
 			}
@@ -87,6 +87,64 @@ abstract class UCIEngine {
 		} catch (IOException e) {
 			throw new StockfishEngineException(e);
 		}
+	}
+
+	public String readEvaluation(String turn) {
+		try {
+
+			String eval = "";
+			String bestmove = "";
+			String mate = "";
+
+			String line;
+			while ((line = input.readLine()) != null) {
+
+				eval = extractInfo(line, "score cp", eval);
+
+				mate = extractInfo(line, "score mate", mate);
+
+				bestmove = extractInfo(line, "bestmove", bestmove);
+
+				if (!bestmove.equals("")) {
+					break;
+				}
+			}
+
+			if (!mate.equals("")) {
+				if (mate.contains("-")) {
+					eval = "-#" + mate.replace("-", "");
+				} else {
+					eval = "#" + mate;
+				}
+			} else {
+				eval = calculateAbsoluteEvaluation(turn, eval);
+			}
+
+			return eval + " " + bestmove;
+
+		} catch (IOException e) {
+			throw new StockfishEngineException(e);
+		}
+	}
+
+	private String extractInfo(String line, String infoName, String currentInfo) {
+
+		if (line.contains(infoName)) {
+			currentInfo = line.split(infoName)[1].trim().split(" ")[0];
+		}
+
+		return currentInfo;
+	}
+
+	private String calculateAbsoluteEvaluation(String turn, String cpEval) {
+
+		int intEval = Integer.parseInt(cpEval);
+
+		if (turn.equals("b")) {
+			intEval = intEval * (-1);
+		}
+
+		return Integer.toString(intEval);
 	}
 
 	private void passOption(Option option) {

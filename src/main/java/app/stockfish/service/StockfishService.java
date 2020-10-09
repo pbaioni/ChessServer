@@ -93,13 +93,10 @@ public class StockfishService {
 
 	public void stop() {
 		client.stop();
-		
 	}
 
 
 	public void cancel() {
-		
 		client.cancel();
-		
 	}
 }
