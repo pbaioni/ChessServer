@@ -22,7 +22,6 @@ public class EngineEvaluation {
 		this.bestMove = splitEval[1].trim();
 		this.depth = depth;
 		this.canceled = stringEvaluation.contains("canceled");
-		System.out.println(this.toString());
 	}
 
 	public String getEvaluation() {

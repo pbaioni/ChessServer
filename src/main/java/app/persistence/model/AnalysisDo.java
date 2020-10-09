@@ -63,6 +63,7 @@ public class AnalysisDo {
 		moves = new HashSet<MoveEvaluationDo>();
 		drawings = new HashSet<DrawingDo>();
 		this.depth = 0;
+		this.evaluation = "0";
 	}
 
 	public String getShortFen() {
