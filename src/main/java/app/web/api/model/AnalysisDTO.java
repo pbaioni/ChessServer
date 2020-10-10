@@ -155,9 +155,6 @@ public class AnalysisDTO {
 			if(evaluation.contains("-")) {
 				intEval = intEval * (-1);
 			}
-			if(turn.equals("b")) {
-				intEval = intEval * (-1);
-			}
 		}else {
 			intEval = Integer.parseInt(evaluation);
 		}
