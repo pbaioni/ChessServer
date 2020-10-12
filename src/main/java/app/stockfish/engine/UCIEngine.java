@@ -114,7 +114,7 @@ abstract class UCIEngine {
 				if (mate.contains("-")) {
 					eval = "-#" + mate.replace("-", "");
 				} else {
-					eval = "#" + mate;
+					eval = "+#" + mate;
 				}
 			} else {
 				eval = calculateAbsoluteEvaluation(turn, eval);
