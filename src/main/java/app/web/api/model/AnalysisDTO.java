@@ -95,14 +95,15 @@ public class AnalysisDTO {
 		}
 		calculateBestMove();
 	}
-	
-	//must shift of 1 move the mating evaluations when just calculated to be coherent with database storing logic
+
+	// must shift of 1 move the mating evaluations when just calculated to be
+	// coherent with database storing logic
 	public void addStockfishMove(String bestMove, String evaluation) {
 		if (!isMovePresent(bestMove)) {
 			moves.add(new MoveEvaluationDTO(bestMove, mapMoveEvalToPositionEval(evaluation, true)));
 		}
 		calculateBestMove();
-		
+
 	}
 
 	private boolean isMovePresent(String move) {
@@ -117,6 +118,7 @@ public class AnalysisDTO {
 		return rval;
 	}
 
+	@SuppressWarnings("unused")
 	private void calculateBestMove() {
 		// looking for the best analyzed move
 		MoveEvaluationDTO bestEval = moves.get(0);
@@ -124,18 +126,20 @@ public class AnalysisDTO {
 		for (MoveEvaluationDTO eval : moves) {
 
 			// do not take in account unanalyzed moves as bestmove candidates
-			if (eval.getEvaluation().equals("-")) {
-				continue;
-			}
-
-			if (turn.equals("b")) {
-				factor = -1;
-				if (getIntEval(eval.getEvaluation()) < getIntEval(bestEval.getEvaluation())) {
+			if (!eval.getEvaluation().equals("-")) {
+				if (bestEval.getEvaluation().equals("-")) {
 					bestEval = eval;
-				}
-			} else {
-				if (getIntEval(eval.getEvaluation()) > getIntEval(bestEval.getEvaluation())) {
-					bestEval = eval;
+				} else {
+					if (turn.equals("b")) {
+						factor = -1;
+						if (getIntEval(eval.getEvaluation()) < getIntEval(bestEval.getEvaluation())) {
+							bestEval = eval;
+						}
+					} else {
+						if (getIntEval(eval.getEvaluation()) > getIntEval(bestEval.getEvaluation())) {
+							bestEval = eval;
+						}
+					}
 				}
 			}
 		}
@@ -144,36 +148,39 @@ public class AnalysisDTO {
 		setBestMove(bestEval.getMove());
 
 		// updating centipawn losses
-		for (MoveEvaluationDTO eval : moves) {
+		if (false) {
+			for (MoveEvaluationDTO eval : moves) {
 
-			int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation())
-					- (factor * getIntEval(eval.getEvaluation())));
-			if (centipawnLoss > 10000) {
-				centipawnLoss = 10000;
-			}
-			if (centipawnLoss < -10000) {
-				centipawnLoss = -10000;
-			}
+				int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation())
+						- (factor * getIntEval(eval.getEvaluation())));
+				if (centipawnLoss > 10000) {
+					centipawnLoss = 10000;
+				}
+				if (centipawnLoss < -10000) {
+					centipawnLoss = -10000;
+				}
 
-			eval.setCentipawnLoss(centipawnLoss);
+				eval.setCentipawnLoss(centipawnLoss);
+			}
 		}
 
 	}
 
 	private String mapMoveEvalToPositionEval(String moveEvaluation, boolean inverted) {
-		
+
 		String positionEval = moveEvaluation;
-		
+
 		int moveShift = 0;
-		if(inverted) {
+		if (inverted) {
 			moveShift = -1;
 		}
 
 		if (moveEvaluation.contains("#")) {
-			int moves = Integer.parseInt(moveEvaluation.substring(moveEvaluation.lastIndexOf("#")+1, moveEvaluation.length())) + moveShift;
+			int moves = Integer.parseInt(
+					moveEvaluation.substring(moveEvaluation.lastIndexOf("#") + 1, moveEvaluation.length())) + moveShift;
 			if (moveEvaluation.contains("+#")) {
 				positionEval = "-#" + moves;
-			}else {
+			} else {
 				moves++;
 				positionEval = "+#" + moves;
 			}
