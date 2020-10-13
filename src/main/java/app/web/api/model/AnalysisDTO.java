@@ -45,20 +45,6 @@ public class AnalysisDTO {
 	}
 
 	public void setEvaluation(String evaluation) {
-		if (evaluation.contains("#")) {
-			if(evaluation.equals("+#0")) {
-				this.evaluation = "+#1";
-				return;
-			}
-			
-			int moves = Integer.parseInt(evaluation.substring(evaluation.lastIndexOf("#")+1, evaluation.length()));
-			if (evaluation.contains("+#")) {
-				evaluation = "-#" + moves;
-			}else {
-				moves++;
-				evaluation = "+#" + moves;
-			}
-		}
 		this.evaluation = evaluation;
 	}
 
@@ -109,6 +95,15 @@ public class AnalysisDTO {
 		}
 		calculateBestMove();
 	}
+	
+	//must shift of 1 move the mating evaluations when just calculated to be coherent with database storing logic
+	public void addStockfishMove(String bestMove, String evaluation) {
+		if (!isMovePresent(bestMove)) {
+			moves.add(new MoveEvaluationDTO(bestMove, mapMoveEvalToPositionEval(evaluation, true)));
+		}
+		calculateBestMove();
+		
+	}
 
 	private boolean isMovePresent(String move) {
 		boolean rval = false;
@@ -145,7 +140,7 @@ public class AnalysisDTO {
 			}
 		}
 		// updating analysis properties
-		setEvaluation(bestEval.getEvaluation());
+		setEvaluation(mapMoveEvalToPositionEval(bestEval.getEvaluation(), false));
 		setBestMove(bestEval.getMove());
 
 		// updating centipawn losses
@@ -163,6 +158,27 @@ public class AnalysisDTO {
 			eval.setCentipawnLoss(centipawnLoss);
 		}
 
+	}
+
+	private String mapMoveEvalToPositionEval(String moveEvaluation, boolean inverted) {
+		
+		String positionEval = moveEvaluation;
+		
+		int moveShift = 0;
+		if(inverted) {
+			moveShift = -1;
+		}
+
+		if (moveEvaluation.contains("#")) {
+			int moves = Integer.parseInt(moveEvaluation.substring(moveEvaluation.lastIndexOf("#")+1, moveEvaluation.length())) + moveShift;
+			if (moveEvaluation.contains("+#")) {
+				positionEval = "-#" + moves;
+			}else {
+				moves++;
+				positionEval = "+#" + moves;
+			}
+		}
+		return positionEval;
 	}
 
 	private int getIntEval(String evaluation) {
@@ -191,5 +207,4 @@ public class AnalysisDTO {
 				+ ", depth=" + depth + ", moves=" + moves + ", influences=" + influences + ", drawings=" + drawings
 				+ ", comment=" + comment + "]";
 	}
-
 }

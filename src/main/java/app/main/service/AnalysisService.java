@@ -63,7 +63,7 @@ public class AnalysisService {
 			AnalysisDo analysis = new AnalysisDo(START_FEN);
 			analysis.setBestMove("e2e4");
 			analysis.setEvaluation("20");
-			analysis.setDepth(24);
+			analysis.setDepth(0);
 			analysisRepository.save(analysis);
 			LOGGER.info("Start position analysis saved: " + analysis.toString());
 		}
@@ -131,17 +131,8 @@ public class AnalysisService {
 			analysis.addMove(move.getMove(), findAnalysisInDb(move.getNextShortFen()).getEvaluation());
 		}
 
-		boolean bestMoveMatch = false;
-		for (MoveEvaluationDTO item : analysis.getMoves()) {
-			if (item.getMove().equals(Do.getBestMove())) {
-				bestMoveMatch = true;
-			}
-		}
-
 		// case of best move only as a result of stockfish analysis but never browsed
-		if (!bestMoveMatch) {
-			analysis.addMove(Do.getBestMove(), Do.getEvaluation());
-		}
+		analysis.addStockfishMove(Do.getBestMove(), Do.getEvaluation());
 
 		analysis.setDrawings(Do.getDrawings());
 

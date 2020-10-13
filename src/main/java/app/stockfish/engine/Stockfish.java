@@ -47,7 +47,7 @@ public class Stockfish extends UCIEngine {
 			evaluation += " canceled";
 			stop = false;
 		}
-		
+
 		return evaluation;
 	}
 
