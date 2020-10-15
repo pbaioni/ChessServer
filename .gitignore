@@ -1,3 +1,6 @@
 /DB/
 /target/
 /.DS_Store
+/DB.log
+/DB.properties
+/DB.script
