@@ -104,6 +104,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				break;
 			case "shutdown":
 				LOGGER.info("Shutting down");
+				analysisService.shutdown();
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");

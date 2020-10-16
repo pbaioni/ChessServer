@@ -329,4 +329,10 @@ public class AnalysisService {
 		analysisRepository.save(analysis);
 	}
 
+	public void shutdown() {
+		
+		System.exit(0);
+		
+	}
+
 }
