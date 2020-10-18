@@ -1,0 +1,178 @@
+Opening Analyser, mode d’emploi
+
+Paragraphes :
+
+1) Installation
+2) Lancer l’interface utilisateur
+3) Préférences utilisateur pour l’interface
+4) Démarrage du serveur
+5) Préférences utilisateur pour le serveur
+6) Instructions serveur en ligne de commande 
+7) Présentation de l’interface utilisateur
+8) Annotations Graphiques
+9) Bases de données multiples
+10) Effacer la base de données
+11) Arrêter le serveur
+
+    1. Installation
+
+Une fois que le bon installer a été téléchargé (3 versions sont disponibles : Linux, MacOs et Windows) il suffit de double cliquer pour lancer l’installation du logiciel. Le seul paramètre à choisir lors de ce processus c’est le répertoire d’installation. Dans la suite du mode d’emploi, le chemin vers répertoire d’installation + le dossier « OpeningAnalyser » sera appelé <baseDir>.
+En gros : <chemin installation>/OpeningAnalyser = <baseDir>
+
+    2. Lancer l’interface utilisateur
+
+Pour lancer l’interface il suffit de double cliquer sur le fichier <baseDir>/HMI/OpeningAnalyser.html
+La page s’ouvrira automatiquement dans votre navigateur par défaut (Safari, Chrome et Firefox ont été testés). Pour plus de praticien, il est conseillé de créer un favori dans le navigateur.
+Au lancement, un test de couleur pour les flèches d’analyse est lancé, on peut y voir en bas les dégradés de couleurs pour les positions de plus en plus bonnes, en haut  les dégradés de couleurs pour les positions de plus en plus mauvaises.
+Au bout de deux secondes ce test est effacé et l’interface devient disponible.
+On remarquera en bas à gauche une zone qui donne l’état de la connexion au serveur, il est impératif de démarrer le serveur pour pouvoir utiliser le logiciel.
+
+
+    3. Préférences utilisateur pour l’interface
+
+Dans le fichier <baseDir>/HMI/js/properties.js, l’utilisateur peut choisir certains paramètres par défaut pour customiser le logiciel, voici un extrait du fichier :
+
+properties = {
+  //the default depth for stockfish analysis
+  defaultAnalysisDepth: 24,
+
+  //the port number used to communicate with the server
+  serverPort: 9099,
+
+  //define interval (in milliseconds) for server connection checking
+  testlinkPeriod: 3000,
+
+  //centipawn absolute limit for shadowed move arrows. 
+  //Above that there is only a static color (red for lost positions, cyan for won positions)
+  arrowShadeLimit: 400,
+
+  //number of shades for square influences
+  contourShadeLimit: 3,
+
+  //define the width of the move arrow graphic
+  moveArrowWidth: 15,
+
+  //define the width of the user annotation arrow
+  userArrowWidth: 10,
+
+  //define the width of the unanalized move arrow
+  unanalizedArrowWidth: 6
+}
+
+    4. Démarrage du serveur
+
+Pour démarrer le serveur il faut double cliquer sur le fichier <baseDir>/Server/startServer
+Une fenêtre de flux standard va donc s’ouvrir (Terminal sur Mac et Linux, cmd sur Windows) et on peut voir les sortie de l’activité du serveur, ceci n’a aucune utilité pour l’utilisation du logiciel
+Une fois le serveur démarré, le status de connexion serveur sur l’interface devient vert avec le label « Server Ready », le logiciel est donc prêt pour être utilisé.
+
+    5. Préférences utilisateur pour le serveur
+
+Dans le fichier <baseDir>/Server/config/application.properties l’utilisateur peut choisir certains paramètres par défaut du serveur, voici un extrait de ce fichier :
+
+#the server port used to communicate with the HMI (must be the same as in the interface preferences)
+server.port=9099
+
+#the default stockfish depth analyse to use if not defined in the interface preferences
+stockfish.defaultDepth=24
+
+#path to the engine folder
+stockfish.enginePath=stockfish/
+
+#timeout (in seconds) for stockfish analysis
+stockfish.timeout=300
+
+#number of engines running at the same time
+stockfish.instances=1
+
+#enable or disable the in-line commands 
+command.start=true
+
+    6. Instructions serveur en ligne de commande 
+
+Deux instructions en ligne de commande ont été implementées:
+-	dropall
+-	shutdown
+
+la première, « dropall », efface la base de donné
+La deuxième, « shutdown », arrête le serveur
+
+Pour utiliser ces commandes il suffit de les écrire dans la fenêtre de sortie output du serveur (Terminal sur Mac et Linux, cmd sur Windows) et appuyer sur Entrée
+
+    7. Présentation de l’interface utilisateur
+
+A gauche de l’échiquier il y a une zone avec 6 boutons, 3 cases à cocher, une ligne d’affichage de l’ensemble « meilleur coup + évaluation + profondeur d’analyse) et enfin un gros rectangle fournissant des informations sur la communication avec le serveur.
+
+Fonctions associées au 6 boutons:
+
+-	Start Position : permet de revenir à la position initiale
+
+-	Flip board : tourne l’échiquier
+
+-	Pawn Structure : permet d’afficher la structure de pions sans les pièces. Un deuxième click fait réapparaître les pièces
+
+-	Delete line : affiche une boite de dialogue qui permet d’effacer une variante enregistrée en base de données. La variante à effacer devra être écrite dans la forme uci, c’est à dire sans spécifier la pièce qui bouge mais seulement les cases de départ et d’arrivée. Ex : le coup qui bouge le cavalier de g1 à f3 s’écrit g1f3 et le petit roque e1g1.
+Attention : toute les sous-variantes de la variante sélectionnée seront effacées aussi !
+
+-	Update line depth : permet de mettre à jour la profondeur d’analyse d’une variante. A partir de la position courante, toutes les sous-positions seront recalculées si la profondeur d’analyse de la sous-position est inférieure à celle qui vient d’être spécifiée pour la mise à jour.
+En fonction du nombre de sous-positions et de la profondeur demandée, cette action peut prendre plus ou moins de temps.
+Pour avoir une idée du temps d’analyse d’une position en fonction de la profondeur regarder le paragraphe « Temps d’analyse »
+La mise à jour peut être interrompue à n’importe quel moment en cliquant à nouveau sur le bouton. Dans ce cas, seulement les positions qui ont eu le temps d’être recalculées seront mises à jour, les autre resteront inchangées.
+
+-	Import games : permet d’importer les premiers coups des parties contenues dans tous les fichiers au format pgn qui auront été déposés dans le répertoire <baseDir>/Server/import.
+Il faudra spécifier deux paramètres :
+1) le nombre de coups qu’on veut importer. Ex : si on choisit 4 les quatre premiers coups blancs et noirs (8 coups au total) de chaque partie seront calculés
+2) la profondeur d’analyse visée
+Il est important que les parties contenues dans les fichiers pgn correspondent à la variante standard des échecs (pas de Antichess ou 960 par exemple) et que chaque partie commence au coup numéro 1. Dans le cas contraire l’import échoue.
+Un fichier pgn peut contenir plusieurs parties, sans limitation en nombre. Par exemple un joueur pourra télécharger toutes ses parties depuis lichess.org ou chess.com, purger les parties qui ne commencent pas au premier coup ou qui ne correspondent pas à la variante standard des échecs, déposer le fichier dans le répertoire « import » et analyser les premiers coup de toutes les parties qu’il a jouées pour mieux comprendre les erreurs récurrentes dans son jeu.
+
+Fonctions associées au 3 cases à cocher:
+
+-	Enable analysis : active ou désactive l’utilisation de stockfish. Une position parcourue mais non analysée par stockfish sera enregistrée avec des paramètres par défaut
+
+-	Drawings : active ou désactive l’affichage des annotations graphiques de l’utilisateur (cercles et flèches). Si l’option est désactivée, la sauvegarde des annotations est également inhibée
+
+-	Show influence :  active ou désactive l’affichage de l’influence sur les cases des pièces blanche et noires.
+Une case sans bordure n’est controlée par aucun des deux camps
+Une case avec une bordure jaune est controlée majoritairement par les blancs. Plus le jaune est marqué, plus la superieurité de contrôle est forte
+Une case avec une bordure cyan est controlée majoritairement par les noirs. Plus le cyan est marqué, plus la superieurité de contrôle est forte
+Une case avec une bordure blanche est controlée en égale mesure par les deux camps
+
+A droite de l’échiquier , il y a une zone de commentaire. Pour sauvegarder un commentaire on peut cliquer sur le bouton « Save Comment » ou utiliser le raccourci clavier CTRL + ENTREE
+
+    8. Annotations Graphiques
+
+Le logiciel permet de dessiner des cercles et des flèches de differente couleurs. Les couleurs disponibles et les touches clavier associées sont les suivantes :
+
+-	w = blanc 	(White)
+-	k = noir	(blacK)
+-	b = bleu	(Blue)
+-	r = rouge	(Red)
+-	g = vert	(Green)
+-	c = cyan	(Cyan)
+-	y = jaune	(Yellow)
+-	p = violet	(Purple)
+
+Pour dessiner un cercle il faut appuyer sur la touche couleur voulue (sans la relâcher) et faire un click droit sur la case ou on veut dessiner
+Pour effacer un cercle il faut faire un click droit sur la case qu’on veut effacer
+
+Pour dessiner une flèche il faut appuyer sur la touche couleur voulue (sans la relâcher), maintenir enfoncé le bouton droit de la souris et bouger la souris de la case de départ à la case d’arrivée de la flèche
+Pour effacer une flèche il faut maintenir enfoncé le bouton droit de la souris et bouger la souris de la case de départ à la case d’arrivée. En gros il faut reparcourir la flèche en tenant le bouton droit enfoncé sans appuyer sur une touche couleur.
+
+    9. Bases de données multiples
+
+Le logiciel est à sa première version et pour l’instant il ne permet pas de gérer plusieurs bases de données. Si l’utilisateur veut éviter, par exemple, de mélanger la théorie et l’analyse de ses propres parties il peut dupliquer le repertoire <baseDir>/Server (en les nommant par exemple « ServerTheory » et « ServerGames »). Pour utiliser l’une ou l’autre base, il suffira de démarrer l’un ou l’autre serveur au choix (mais pas au même temps !).
+
+    10.  Effacer la base de données
+       
+Pour effacer la base de données et repartir de zéro, l’utilisateur a deux possibilités :
+
+1) effacer tous les fichiers du répertoire <baseDir>/Server/DB. Ceci aura le seul effet de repartir à zéro, ça ne corrompra nullement le logiciel
+2) utiliser la commande « dropall » dans la fenêtre de output du serveur (voir paragraphe 6)
+
+    11.  Arrêter le serveur
+
+Pour arrêter le serveur l’utilisateur a deux possibilités :
+
+1) fermer l’interface utilisateur dans le navigateur. 3 secondes après que la dernière interface utilisateur ait été fermée (plusieurs UI peuvent être ouvertes au même temps), le serveur s’arrête automatiquement.
+2) utiliser la commande « shutdown » dans la fenêtre de output du serveur (voir paragraphe 6)
+
