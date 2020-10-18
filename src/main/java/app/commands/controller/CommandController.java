@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import app.commands.properties.CommandProperties;
 import app.main.service.AnalysisService;
+import app.stockfish.service.StockfishService;
 
 @Service
 public class CommandController implements CommandLineRunner, DisposableBean {
@@ -24,12 +25,14 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommandController.class);
 
 	@Autowired
+	CommandProperties properties;
+	
+	@Autowired
 	AnalysisService analysisService;
 
-	@Autowired
-	CommandProperties properties;
-
 	boolean runCommands;
+	
+	private static final String DELIMITER = " ";
 
 	public CommandController() {
 
@@ -52,8 +55,8 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 			br = new BufferedReader(new InputStreamReader(System.in));
 			LOGGER.info("Implemented inline commands : ");
 			LOGGER.info("dropall : erase database");
-			LOGGER.info("shutdown : stop server");
 			LOGGER.info("q : quit inline commands");
+			LOGGER.info("shutdown : stop server");
 
 			runCommands = true;
 			while (runCommands) {
@@ -78,7 +81,7 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 
 	private void manageCommands(String commandLine) throws Exception {
 		Scanner scanner = new Scanner(commandLine);
-		scanner.useDelimiter(" ");
+		scanner.useDelimiter(DELIMITER);
 		if (scanner.hasNext()) {
 			String command = scanner.next();
 			List<String> arguments = new ArrayList<String>();
