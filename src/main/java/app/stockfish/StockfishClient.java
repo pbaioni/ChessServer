@@ -9,6 +9,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import app.stockfish.engine.Stockfish;
 import app.stockfish.engine.enums.Option;
 import app.stockfish.engine.enums.Query;
@@ -16,6 +19,9 @@ import app.stockfish.engine.enums.Variant;
 import app.stockfish.exceptions.StockfishInitException;
 
 public class StockfishClient {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(StockfishClient.class);
+
 	private ExecutorService executor, callback;
 	private Queue<Stockfish> availableEngines;
 	private Queue<Stockfish> busyEngines;
@@ -38,8 +44,7 @@ public class StockfishClient {
 
 	public void submit(Query query, Consumer<String> result) {
 		executor.submit(() -> {
-			Stockfish engine = availableEngines.remove();
-			busyEngines.add(engine);
+			Stockfish engine = getEngine();
 			String output;
 
 			switch (query.getType()) {
@@ -47,7 +52,7 @@ public class StockfishClient {
 				output = engine.getEngineEvaluation(query);
 				break;
 			case Make_Move:
-				output = engine.makeMove(query);
+				output = engine.getFenAfterMove(query);
 				break;
 			case Legal_Moves:
 				output = engine.getLegalMoves(query);
@@ -58,39 +63,48 @@ public class StockfishClient {
 			}
 
 			callback.submit(() -> result.accept(output));
-			busyEngines.remove(engine);
-			availableEngines.add(engine);
+			releaseEngine(engine);
 		});
 	}
-	
+
+	public Stockfish getEngine() {
+		Stockfish engine = availableEngines.remove();
+		busyEngines.add(engine);
+		return engine;
+	}
+
+	public void releaseEngine(Stockfish engine) {
+		busyEngines.remove(engine);
+		availableEngines.add(engine);
+	}
+
 	public void stop() {
 		int count = 1;
-		for(Stockfish s : availableEngines) {
+		for (Stockfish s : availableEngines) {
 			try {
-				System.out.println("Stopping Stockfish engine #" + count);
+				LOGGER.debug("Stopping Stockfish engine #" + count);
 				s.close();
 				count++;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 		executor.shutdownNow();
 		callback.shutdownNow();
-		
+
 	}
-	
+
 	public void cancel() {
 
-		for(Stockfish s : busyEngines) {
+		for (Stockfish s : busyEngines) {
 			try {
 				s.cancel();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		
+
 	}
 
 	public static class Builder {
