@@ -9,7 +9,7 @@
 		</layout>
 	</appender>
 
-	<logger name="app.stockfish.engine.UCIEngine" level="debug" additivity="false">
+	<logger name="app.stockfish.engine.UCIEngine" level="info" additivity="false">
 		<appender-ref ref="CONSOLE" />
 	</logger>
 
