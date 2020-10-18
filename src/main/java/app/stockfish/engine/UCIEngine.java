@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import app.stockfish.engine.enums.Option;
 import app.stockfish.engine.enums.Variant;
 import app.stockfish.exceptions.StockfishEngineException;
 import app.stockfish.exceptions.StockfishInitException;
-import app.stockfish.service.StockfishService;
 
 abstract class UCIEngine {
 
@@ -42,10 +40,10 @@ abstract class UCIEngine {
 
 	void waitForReady() {
 		sendCommand("isready");
-		readResponse("readyok");
+		readLine("readyok");
 	}
 
-	void sendCommand(String command) {
+	public void sendCommand(String command) {
 		try {
 			LOGGER.debug("Sending command: " + command);
 			output.write(command + "\n");
@@ -71,12 +69,13 @@ abstract class UCIEngine {
 		}
 	}
 
-	List<String> readResponse(String expected) {
+	List<String> readLines(String expected) {
 		try {
 			List<String> lines = new ArrayList<>();
 			String line;
 
 			while ((line = input.readLine()) != null) {
+				LOGGER.debug("Read lines: " + line);
 				lines.add(line);
 				if (line.startsWith(expected)) {
 					break;
@@ -89,7 +88,7 @@ abstract class UCIEngine {
 		}
 	}
 
-	public String readEvaluation(String turn) {
+	public String getAbsoluteEvaluation(String turn) {
 		try {
 
 			String eval = "";
@@ -98,7 +97,9 @@ abstract class UCIEngine {
 
 			String line;
 			while ((line = input.readLine()) != null) {
-
+				
+				LOGGER.debug("Read evaluation: " + line);
+				
 				eval = extractInfo(line, "score cp", eval);
 
 				mate = extractInfo(line, "score mate", mate);
@@ -120,12 +121,19 @@ abstract class UCIEngine {
 				}
 				if(mate.equals("0")) {
 					//when a player is mated, stockfish evaluation is "mate 0" 
-					//here we add a "-" to keep it clear that it is a lost position
+					//here we add a "-" to make it clear that it is a lost position
 					eval = "-#0";
 					bestmove = "-";
 				}
 			} else {
-				eval = calculateAbsoluteEvaluation(turn, eval);
+				//stockfish calculates evaluation from player's point of view(+ for player's good positions, - for bad ones)
+				//if we want black advantage as a negative value, we must correct the stockfish output
+				if (turn.equals("b")) {
+					int intEval = Integer.parseInt(eval);
+					intEval = intEval * (-1);
+					eval = Integer.toString(intEval);
+				}
+
 			}
 
 			return eval + " " + bestmove;
@@ -142,19 +150,6 @@ abstract class UCIEngine {
 		}
 
 		return currentInfo;
-	}
-
-	private String calculateAbsoluteEvaluation(String turn, String cpEval) {
-
-		int intEval = Integer.parseInt(cpEval);
-
-		//stockfish calculates evaluation from player's point of view(+ for player's good positions, - for bad ones)
-		//if we want black advantage as a negative value, we must correct the stockfish output
-		if (turn.equals("b")) {
-			intEval = intEval * (-1);
-		}
-
-		return Integer.toString(intEval);
 	}
 
 	private void passOption(Option option) {
