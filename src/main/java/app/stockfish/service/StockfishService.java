@@ -40,7 +40,7 @@ public class StockfishService {
 	
 	public void init() {
         try {
-			client = new StockfishClient.Builder()
+			this.client = new StockfishClient.Builder()
 					.setPath(stockfishProperties.getEnginePath())
 			        .setInstances(Integer.parseInt(stockfishProperties.getInstances()))
 			        .setOption(Option.Threads, stockfishProperties.getThreads())
@@ -73,7 +73,7 @@ public class StockfishService {
 		AtomicReference<String> atomicRval = new AtomicReference<>();
 		Awaitility.setDefaultPollInterval(1000, TimeUnit.MILLISECONDS);
 		Awaitility.setDefaultPollDelay(Duration.ZERO);
-		Awaitility.setDefaultTimeout(Duration.ofSeconds(300L));
+		Awaitility.setDefaultTimeout(Duration.ofSeconds(stockfishProperties.getTimeout()));
         client.submit(new Query.Builder(type)
                 .setFen(fen)
                 .setDepth(targetDepth)
@@ -90,13 +90,11 @@ public class StockfishService {
 		return atomicRval.get();
 	}
 
-
-	public void stop() {
-		client.stop();
-	}
-
-
 	public void cancel() {
 		client.cancel();
+	}
+	
+	public void stop() {
+		client.stop();
 	}
 }
