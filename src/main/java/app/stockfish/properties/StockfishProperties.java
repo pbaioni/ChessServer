@@ -25,6 +25,8 @@ public class StockfishProperties {
 	
 	private String ownbook;
 	
+	private long timeout;	//seconds
+	
 	public StockfishProperties() {
 		
 	}
@@ -93,11 +95,18 @@ public class StockfishProperties {
 		this.ownbook = ownbook;
 	}
 
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
+	}
+
 	@Override
 	public String toString() {
 		return "StockfishProperties [instances=" + instances + ", threads=" + threads + ", defaultDepth=" + defaultDepth
 				+ ", skills=" + skills + ", enginePath=" + enginePath + ", hash=" + hash + ", multipv=" + multipv
-				+ ", ownbook=" + ownbook + "]";
+				+ ", ownbook=" + ownbook + ", timeout=" + timeout + "]";
 	}
-
 }
