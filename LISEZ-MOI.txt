@@ -13,6 +13,7 @@ Paragraphes :
 9) Bases de données multiples
 10) Effacer la base de données
 11) Arrêter le serveur
+12) Estimation du temps d'analyse, de update et d'import
 
     1. Installation
 
@@ -22,7 +23,7 @@ En gros : <chemin installation>/OpeningAnalyser = <baseDir>
     2. Lancer l’interface utilisateur
 
 Pour lancer l’interface il suffit de double cliquer sur le fichier <baseDir>/HMI/OpeningAnalyser.html
-La page s’ouvrira automatiquement dans votre navigateur par défaut (Safari, Chrome et Firefox ont été testés). Pour plus de praticien, il est conseillé de créer un favori dans le navigateur.
+La page s’ouvrira automatiquement dans votre navigateur par défaut (Safari, Chrome et Firefox ont été testés). Pour plus de praticité, il est conseillé de créer un favori dans le navigateur.
 Au lancement, un test de couleur pour les flèches d’analyse est lancé, on peut y voir en bas les dégradés de couleurs pour les positions de plus en plus bonnes, en haut  les dégradés de couleurs pour les positions de plus en plus mauvaises.
 Au bout de deux secondes ce test est effacé et l’interface devient disponible.
 On remarquera en bas à gauche une zone qui donne l’état de la connexion au serveur, il est impératif de démarrer le serveur pour pouvoir utiliser le logiciel.
@@ -62,7 +63,7 @@ properties = {
     4. Démarrage du serveur
 
 Pour démarrer le serveur il faut double cliquer sur le fichier <baseDir>/Server/startServer
-Une fenêtre de flux standard va donc s’ouvrir (Terminal sur Mac et Linux, cmd sur Windows) et on peut voir les sortie de l’activité du serveur, ceci n’a aucune utilité pour l’utilisation du logiciel
+Une fenêtre de flux standard va donc s’ouvrir (Terminal sur Mac et Linux, cmd sur Windows) et on peut voir les sorties de l’activité du serveur, ceci n’a aucune utilité pour l’utilisation du logiciel
 Une fois le serveur démarré, le status de connexion serveur sur l’interface devient vert avec le label « Server Ready », le logiciel est donc prêt pour être utilisé.
 
     5. Préférences utilisateur pour le serveur
@@ -115,7 +116,7 @@ Attention : toute les sous-variantes de la variante sélectionnée seront effac
 
 -	Update line depth : permet de mettre à jour la profondeur d’analyse d’une variante. A partir de la position courante, toutes les sous-positions seront recalculées si la profondeur d’analyse de la sous-position est inférieure à celle qui vient d’être spécifiée pour la mise à jour.
 En fonction du nombre de sous-positions et de la profondeur demandée, cette action peut prendre plus ou moins de temps.
-Pour avoir une idée du temps d’analyse d’une position en fonction de la profondeur regarder le paragraphe « Temps d’analyse »
+Pour avoir une idée du temps d’analyse d’une position en fonction de la profondeur regarder le paragraphe 12 « Estimation du temps d’analyse »
 La mise à jour peut être interrompue à n’importe quel moment en cliquant à nouveau sur le bouton. Dans ce cas, seulement les positions qui ont eu le temps d’être recalculées seront mises à jour, les autre resteront inchangées.
 
 -	Import games : permet d’importer les premiers coups des parties contenues dans tous les fichiers au format pgn qui auront été déposés dans le répertoire <baseDir>/Server/import.
@@ -175,4 +176,23 @@ Pour arrêter le serveur l’utilisateur a deux possibilités :
 
 1) fermer l’interface utilisateur dans le navigateur. 3 secondes après que la dernière interface utilisateur ait été fermée (plusieurs UI peuvent être ouvertes au même temps), le serveur s’arrête automatiquement.
 2) utiliser la commande « shutdown » dans la fenêtre de output du serveur (voir paragraphe 6)
+
+    12.  Estimation du temps d'analyse, de update et d'import
+
+Sur un ordinateur avec un processeur core I5 à 3GHz, on a ces valeurs de temps d'analyse pour une position:
+
+-	profondeur 16: 1 sec
+-	profondeur 21: 6 sec
+-	profondeur 24: 15 sec
+-	profondeur 28: 35 sec
+-	profondeur 32: 1 min
+
+Sur une action d'import d'ouverture de parties jouées, mille parties avec une profondeur d'ouverture à 7 représentent plusieurs milliers de positions à calculer même si on a l'impression de jouer toujours les mêmes ouvertures. 4000 positions à une profondeur 24 ça fait 1000 minutes de calcul soit un peu moins de 17 heures! Réfléchissez bien à tout ça avant de lancer un import... et lancez-le la nuit s'il est gros. Sachez aussi que rien ne vous empêche de l'étaler sur plusieurs nuits, vous pouvez l'interrompre quand vous voulez et la fois d'après il reprendra là ou il s'était arrêté.
+
+
+
+
+
+
+
 
