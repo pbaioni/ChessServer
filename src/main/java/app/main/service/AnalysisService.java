@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 import com.google.gson.Gson;
 
 import app.main.service.helper.FenHelper;
@@ -270,6 +271,11 @@ public class AnalysisService {
 			}
 		});
 
+		File imported = new File("./import/imported");
+		if (!imported.exists()) {
+			imported.mkdirs();
+		}
+
 		for (File pgnToLoad : pgnFiles) {
 
 			LOGGER.info("Loading pgn file: " + pgnToLoad.getName());
@@ -305,6 +311,11 @@ public class AnalysisService {
 				}
 
 			}
+
+			if (!stopTask) {
+				Files.move(pgnToLoad, new File(imported.getAbsolutePath() + "/" + pgnToLoad.getName()));
+				LOGGER.info("File " + pgnToLoad.getName() + " imported and archived");
+			}
 		}
 
 		if (stopTask) {
@@ -330,9 +341,9 @@ public class AnalysisService {
 	}
 
 	public void shutdown() {
-		
+
 		System.exit(0);
-		
+
 	}
 
 }
