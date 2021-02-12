@@ -97,9 +97,9 @@ abstract class UCIEngine {
 
 			String line;
 			while ((line = input.readLine()) != null) {
-				
+
 				LOGGER.debug("Read evaluation: " + line);
-				
+
 				eval = extractInfo(line, "score cp", eval);
 
 				mate = extractInfo(line, "score mate", mate);
@@ -111,23 +111,26 @@ abstract class UCIEngine {
 				}
 			}
 
-			//managing mate evaluations
-			//stockfish outputs examples: "mate 1" for winning in 1 move , "mate -2" for losing in 2 moves
+			// managing mate evaluations
+			// stockfish outputs examples: "mate 1" for winning in 1 move , "mate -2" for
+			// losing in 2 moves
 			if (!mate.equals("")) {
 				if (mate.contains("-")) {
 					eval = "-#" + mate.replace("-", "");
 				} else {
 					eval = "+#" + mate;
 				}
-				if(mate.equals("0")) {
-					//when a player is mated, stockfish evaluation is "mate 0" 
-					//here we add a "-" to make it clear that it is a lost position
+				if (mate.equals("0")) {
+					// when a player is mated, stockfish evaluation is "mate 0"
+					// here we add a "-" to make it clear that it is a lost position
 					eval = "-#0";
 					bestmove = "-";
 				}
 			} else {
-				//stockfish calculates evaluation from player's point of view(+ for player's good positions, - for bad ones)
-				//if we want black advantage as a negative value, we must correct the stockfish output
+				// stockfish calculates evaluation from player's point of view(+ for player's
+				// good positions, - for bad ones)
+				// if we want black advantage as a negative value, we must correct the stockfish
+				// output
 				if (turn.equals("b")) {
 					int intEval = Integer.parseInt(eval);
 					intEval = intEval * (-1);
@@ -160,7 +163,14 @@ abstract class UCIEngine {
 		StringBuilder path = new StringBuilder(
 				override == null ? "assets/engines/stockfish_10_x64" : override + "stockfish");
 
-		if (System.getProperty("os.name").toLowerCase().contains("win"))
+		if (System.getProperty("os.name").toLowerCase().contains("win")) {
+
+			if (System.getenv("ProgramFiles(x86)") != null) {
+				path.append("_64");
+			} else {
+				path.append("_32");
+			}
+
 			switch (variant) {
 			case DEFAULT:
 				path.append(".exe");
@@ -174,7 +184,9 @@ abstract class UCIEngine {
 			default:
 				throw new StockfishEngineException("Illegal variant provided.");
 			}
-		else
+
+		} else {
+
 			switch (variant) {
 			case DEFAULT:
 				break;
@@ -187,6 +199,8 @@ abstract class UCIEngine {
 			default:
 				throw new StockfishEngineException("Illegal variant provided.");
 			}
+
+		}
 
 		return path.toString();
 	}
