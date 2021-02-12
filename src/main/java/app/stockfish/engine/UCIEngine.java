@@ -165,9 +165,7 @@ abstract class UCIEngine {
 
 		if (System.getProperty("os.name").toLowerCase().contains("win")) {
 
-			if (System.getenv("ProgramFiles(x86)") != null) {
-				path.append("_64");
-			} else {
+			if (System.getenv("ProgramFiles(x86)") == null) {
 				path.append("_32");
 			}
 
