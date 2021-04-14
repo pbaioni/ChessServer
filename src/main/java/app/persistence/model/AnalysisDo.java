@@ -42,7 +42,7 @@ public class AnalysisDo {
 	private int depth;
 
 	@Lob 
-	@Column(name="COMMENT", length=1024)
+	@Column(name="COMMENT", length=2048)
 	private String comment;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
