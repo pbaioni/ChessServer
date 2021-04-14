@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -20,18 +21,14 @@ import com.google.gson.Gson;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
-import app.persistence.model.DrawingDo;
 import app.persistence.model.MoveEvaluationDo;
 import app.persistence.repo.AnalysisRepository;
 import app.stockfish.engine.EngineEvaluation;
 import app.stockfish.service.StockfishService;
 import app.web.api.model.AnalysisDTO;
-import app.web.api.model.MoveEvaluationDTO;
 import app.web.api.model.SimpleResponseWrapper;
 import pbaioni.chesslib.Board;
 import pbaioni.chesslib.game.Game;
-import pbaioni.chesslib.move.Influence;
-import pbaioni.chesslib.move.InfluenceGenerator;
 import pbaioni.chesslib.move.Move;
 import pbaioni.chesslib.move.MoveList;
 import pbaioni.chesslib.pgn.PgnHolder;
@@ -289,14 +286,21 @@ public class AnalysisService {
 				if (!stopTask) {
 
 					LOGGER.info("Game #" + (games.indexOf(game) + 1) + ", opening: " + game.getEco());
+
 					game.loadMoveText();
+
+					// getting moves and adapting the opening depth if needed
 					MoveList moves = game.getHalfMoves();
-					Board board = new Board();
 					if (moves.size() < openingDepth) {
+						// case of game shorter than the requested opening depth
 						openingDepth = moves.size();
 					}
 
-					// searching for unanalized moves in the opening
+					Map<Integer, String> comments = game.getCommentary();
+
+					Board board = new Board();
+
+					// searching for unanalyzed moves in the opening
 					for (int i = 0; i < openingDepth; i++) {
 						Move move = moves.get(i);
 						String previousFen = board.getFen();
@@ -304,8 +308,28 @@ public class AnalysisService {
 						board.doMove(move);
 						String nextFen = board.getFen();
 						if (!stopTask) {
+
+							// analyzing move
 							performAnalysis(previousFen, uciMove, nextFen, analysisDepth, true);
+
+							// Setting pgn comment
+							if (comments.containsKey(i + 1)) {
+								String oldComment = findAnalysisInDb(FenHelper.getShortFen(nextFen)).getComment();
+								String pgnComment = comments.get(i + 1);
+								String newComment = "";
+								if (Objects.isNull(oldComment)) {
+									newComment = "[Theory]: " + pgnComment;
+									setComment(nextFen, newComment);
+								} else {
+									if (!oldComment.contains(pgnComment)) {
+										newComment = oldComment + "\n\n[Theory]: " + pgnComment;
+										setComment(nextFen, newComment);
+									}
+								}
+
+							}
 						}
+
 					}
 
 				}
@@ -322,7 +346,13 @@ public class AnalysisService {
 			stopTask = false;
 			return wrapResponse(new SimpleResponseWrapper("Import Stopped"));
 		} else {
-			return wrapResponse(new SimpleResponseWrapper("Import completed"));
+			String rval = "";
+			if (pgnFiles.length == 0) {
+				rval = "No file to import";
+			} else {
+				rval = "Import completed";
+			}
+			return wrapResponse(new SimpleResponseWrapper(rval));
 		}
 	}
 
