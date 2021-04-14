@@ -1,7 +1,6 @@
 package app.persistence.model;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -41,7 +41,8 @@ public class AnalysisDo {
 	@Column
 	private int depth;
 
-	@Column
+	@Lob 
+	@Column(name="COMMENT", length=1024)
 	private String comment;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
