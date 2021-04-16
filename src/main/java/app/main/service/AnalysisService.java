@@ -285,9 +285,7 @@ public class AnalysisService {
 			for (Game game : games) {
 				if (!stopTask) {
 
-					LOGGER.info("Game #" + (games.indexOf(game) + 1) + ", opening: " + game.getEco());
-
-					game.loadMoveText();
+					LOGGER.info("Game #" + (games.indexOf(game) + 1) + "\n" + game.toString());
 
 					// getting moves and adapting the opening depth if needed
 					MoveList moves = game.getHalfMoves();
@@ -297,7 +295,7 @@ public class AnalysisService {
 					}
 
 					Map<Integer, String> comments = game.getCommentary();
-
+					
 					Board board = new Board();
 
 					// searching for unanalyzed moves in the opening
@@ -355,6 +353,7 @@ public class AnalysisService {
 			return wrapResponse(new SimpleResponseWrapper(rval));
 		}
 	}
+
 
 	public void stopTask() {
 
