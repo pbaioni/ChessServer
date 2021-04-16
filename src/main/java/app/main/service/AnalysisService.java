@@ -293,9 +293,12 @@ public class AnalysisService {
 						// case of game shorter than the requested opening depth
 						openingDepth = moves.size();
 					}
+					if (!Objects.isNull(game.getVariations())) {
+						LOGGER.info("Variations: " + game.getVariations().toString());
+					}
 
 					Map<Integer, String> comments = game.getCommentary();
-					
+
 					Board board = new Board();
 
 					// searching for unanalyzed moves in the opening
@@ -353,7 +356,6 @@ public class AnalysisService {
 			return wrapResponse(new SimpleResponseWrapper(rval));
 		}
 	}
-
 
 	public void stopTask() {
 
