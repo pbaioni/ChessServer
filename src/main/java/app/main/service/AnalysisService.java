@@ -355,10 +355,10 @@ public class AnalysisService {
 
 			}
 
-//			if (!stopTask) {
-//				Files.move(pgnToLoad, new File(imported.getAbsolutePath() + "/" + pgnToLoad.getName()));
-//				LOGGER.info("File " + pgnToLoad.getName() + " imported and archived");
-//			}
+			if (!stopTask) {
+				Files.move(pgnToLoad, new File(imported.getAbsolutePath() + "/" + pgnToLoad.getName()));
+				LOGGER.info("File " + pgnToLoad.getName() + " imported and archived");
+			}
 		}
 
 		if (stopTask) {
