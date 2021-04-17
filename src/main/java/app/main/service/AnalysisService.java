@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -314,6 +316,37 @@ public class AnalysisService {
 								}
 
 							}
+
+							// Setting arrows
+							String arrows = pos.getArrows();
+							if (!Objects.isNull(arrows)) {
+								for (String arrow : arrows.split(",")) {
+									arrow = arrow.trim();
+									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{1}$";
+									Matcher m = Pattern.compile(regex).matcher(arrow);
+									if (m.matches()) {
+										String color = getHexaColor(arrow.substring(0, 1));
+										String path = arrow.substring(1, 5);
+										updateDrawing(nextFen, "arrow", path, color);
+									}
+								}
+
+							}
+
+							// Setting circles
+							String circles = pos.getCircles();
+							if (!Objects.isNull(circles)) {
+								for (String circle : circles.split(",")) {
+									circle = circle.trim();
+									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}$";
+									Matcher m = Pattern.compile(regex).matcher(circle);
+									if (m.matches()) {
+										String color = getHexaColor(circle.substring(0, 1));
+										String path = circle.substring(1, 3);
+										updateDrawing(nextFen, "circle", path, color);
+									}
+								}
+							}
 						}
 
 					}
@@ -322,10 +355,10 @@ public class AnalysisService {
 
 			}
 
-			if (!stopTask) {
-				Files.move(pgnToLoad, new File(imported.getAbsolutePath() + "/" + pgnToLoad.getName()));
-				LOGGER.info("File " + pgnToLoad.getName() + " imported and archived");
-			}
+//			if (!stopTask) {
+//				Files.move(pgnToLoad, new File(imported.getAbsolutePath() + "/" + pgnToLoad.getName()));
+//				LOGGER.info("File " + pgnToLoad.getName() + " imported and archived");
+//			}
 		}
 
 		if (stopTask) {
@@ -340,6 +373,32 @@ public class AnalysisService {
 			}
 			return wrapResponse(new SimpleResponseWrapper(rval));
 		}
+	}
+
+	private String getHexaColor(String color) {
+
+		switch (color) {
+		case "R":
+			return "#ff0000";
+		case "G":
+			return "#00ff00";
+		case "B":
+			return "#0000ff";
+		case "Y":
+			return "#ffff00";
+		case "C":
+			return "#00ffff";
+		case "W":
+			return "#ffffff";
+		case "K":
+			return "#000000";
+		case "P":
+			return "#9900dd";
+		default:
+			return "#ffffff";
+
+		}
+
 	}
 
 	public void stopTask() {
