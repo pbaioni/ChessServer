@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,8 +28,7 @@ import app.web.api.model.AnalysisDTO;
 import app.web.api.model.SimpleResponseWrapper;
 import pbaioni.chesslib.Board;
 import pbaioni.chesslib.game.Game;
-import pbaioni.chesslib.move.Move;
-import pbaioni.chesslib.move.MoveList;
+import pbaioni.chesslib.game.GamePosition;
 import pbaioni.chesslib.pgn.PgnHolder;
 
 @Service
@@ -257,7 +255,7 @@ public class AnalysisService {
 
 	}
 
-	public String fillDatabaseFromPGN(int openingDepth, int analysisDepth) throws Exception {
+	public String fillDatabaseFromPGN(int openingPlyDepth, int analysisDepth) throws Exception {
 
 		File dir = new File("./import/");
 		File[] pgnFiles = dir.listFiles(new FilenameFilter() {
@@ -287,36 +285,23 @@ public class AnalysisService {
 
 					LOGGER.info("Game #" + (games.indexOf(game) + 1) + "\n" + game.toString());
 
-					// getting moves and adapting the opening depth if needed
-					MoveList moves = game.getHalfMoves();
-					if (moves.size() < openingDepth) {
-						// case of game shorter than the requested opening depth
-						openingDepth = moves.size();
-					}
-					if (!Objects.isNull(game.getVariations())) {
-						LOGGER.info("Variations: " + game.getVariations().toString());
-					}
-
-					Map<Integer, String> comments = game.getCommentary();
-
 					Board board = new Board();
 
 					// searching for unanalyzed moves in the opening
-					for (int i = 0; i < openingDepth; i++) {
-						Move move = moves.get(i);
-						String previousFen = board.getFen();
-						String uciMove = (move.getFrom().name() + move.getTo().name()).toLowerCase();
-						board.doMove(move);
-						String nextFen = board.getFen();
-						if (!stopTask) {
+					for (GamePosition pos : game.getAllPositions()) {
+						if (pos.getPly() <= openingPlyDepth && !stopTask) {
+							String previousFen = pos.getFen();
+							board.loadFromFen(previousFen);
+							board.doMove(pos.getMove());
+							String nextFen = board.getFen();
 
 							// analyzing move
-							performAnalysis(previousFen, uciMove, nextFen, analysisDepth, true);
+							performAnalysis(previousFen, pos.getUciMove(), nextFen, analysisDepth, true);
 
 							// Setting pgn comment
-							if (comments.containsKey(i + 1)) {
+							String pgnComment = pos.getComment();
+							if (!Objects.isNull(pgnComment)) {
 								String oldComment = findAnalysisInDb(FenHelper.getShortFen(nextFen)).getComment();
-								String pgnComment = comments.get(i + 1);
 								String newComment = "";
 								if (Objects.isNull(oldComment)) {
 									newComment = "[Theory]: " + pgnComment;
