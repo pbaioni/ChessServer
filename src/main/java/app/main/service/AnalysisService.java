@@ -124,19 +124,21 @@ public class AnalysisService {
 
 	private AnalysisDTO mapToDto(AnalysisDo Do) {
 
-		AnalysisDTO analysis = new AnalysisDTO(Do.getFen(), Do.getTurn(), Do.getDepth(), Do.getComment());
+		AnalysisDTO Dto = new AnalysisDTO(Do.getFen(), Do.getTurn(), Do.getDepth(), Do.getComment());
 		for (MoveEvaluationDo move : Do.getMoves()) {
-			analysis.addMove(move.getMove(), findAnalysisInDb(move.getNextShortFen()).getEvaluation());
+			Dto.addMove(move.getMove(), findAnalysisInDb(move.getNextShortFen()).getEvaluation());
 		}
 
 		// case of best move only as a result of stockfish analysis but never browsed
-		analysis.addStockfishMove(Do.getBestMove(), Do.getEvaluation());
+		Dto.addStockfishMove(Do.getBestMove(), Do.getEvaluation());
 
-		analysis.setDrawings(Do.getDrawings());
+		Dto.setArrows(Do.getArrows());
+		
+		Dto.setCircles(Do.getCircles());
 
-		LOGGER.debug("DTO: " + analysis.toString());
+		LOGGER.debug("DTO: " + Dto.toString());
 
-		return analysis;
+		return Dto;
 	}
 
 	public String deleteLine(String fen, String move) {
@@ -327,7 +329,7 @@ public class AnalysisService {
 									if (m.matches()) {
 										String color = getHexaColor(arrow.substring(0, 1));
 										String path = arrow.substring(1, 5);
-										updateDrawing(nextFen, "arrow", path, color);
+										updateDrawing(nextFen, arrow);
 									}
 								}
 
@@ -343,7 +345,7 @@ public class AnalysisService {
 									if (m.matches()) {
 										String color = getHexaColor(circle.substring(0, 1));
 										String path = circle.substring(1, 3);
-										updateDrawing(nextFen, "circle", path, color);
+										updateDrawing(nextFen, circle);
 									}
 								}
 							}
@@ -408,10 +410,9 @@ public class AnalysisService {
 		stockfishService.cancel();
 	}
 
-	public void updateDrawing(String fen, String type, String path, String color) {
-
+	public void updateDrawing(String fen, String drawing) {
 		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
-		analysis.updateDrawing(type, path, color);
+		analysis.updateDrawing(drawing);
 		analysisRepository.save(analysis);
 	}
 

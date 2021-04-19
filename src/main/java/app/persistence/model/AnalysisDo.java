@@ -1,8 +1,12 @@
 package app.persistence.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -41,17 +45,19 @@ public class AnalysisDo {
 	@Column
 	private int depth;
 
-	@Lob 
-	@Column(name="COMMENT", length=2048)
+	@Lob
+	@Column(name = "COMMENT", length = 2048)
 	private String comment;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
 	@CollectionTable(name = "moves", joinColumns = @JoinColumn(name = "move"))
 	private Set<MoveEvaluationDo> moves;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
-	@CollectionTable(name = "drawings", joinColumns = @JoinColumn(name = "drawing"))
-	private Set<DrawingDo> drawings;
+	@Column
+	private String arrows;
+
+	@Column
+	private String circles;
 
 	public AnalysisDo() {
 		// NOTHING TO DO
@@ -62,9 +68,10 @@ public class AnalysisDo {
 		this.fen = fen;
 		this.turn = FenHelper.getTurn(fen);
 		moves = new HashSet<MoveEvaluationDo>();
-		drawings = new HashSet<DrawingDo>();
 		this.depth = 0;
 		this.evaluation = "-";
+		this.arrows = "";
+		this.circles = "";
 	}
 
 	public String getShortFen() {
@@ -131,12 +138,20 @@ public class AnalysisDo {
 		this.moves = moves;
 	}
 
-	public Set<DrawingDo> getDrawings() {
-		return drawings;
+	public String getArrows() {
+		return arrows;
 	}
 
-	public void setDrawings(Set<DrawingDo> drawings) {
-		this.drawings = drawings;
+	public void setArrows(String arrows) {
+		this.arrows = arrows;
+	}
+
+	public String getCircles() {
+		return circles;
+	}
+
+	public void setCircles(String circles) {
+		this.circles = circles;
 	}
 
 	public boolean addMove(MoveEvaluationDo moveToAdd) {
@@ -187,38 +202,135 @@ public class AnalysisDo {
 		}
 	}
 
-	public void updateDrawing(String type, String path, String color) {
+	public void updateDrawing(String drawing) {
 
-		// recover drawing to update
-		DrawingDo drawingToUpdate = null;
-		for (DrawingDo drawing : drawings) {
-			if (drawing.getType().equals(type) && drawing.getPath().equals(path)) {
-				drawingToUpdate = drawing;
-				break;
-			}
+		Matcher matcher;
+
+		String arrowRegex = "^[A-Z]{1}[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{1}$";
+		matcher = Pattern.compile(arrowRegex).matcher(drawing);
+		if (matcher.matches()) {
+			addArrow(drawing);
 		}
 
-		if (!Objects.isNull(drawingToUpdate)) {
-
-			// update
-			if (Objects.isNull(color)) {
-				// remove
-				drawings.remove(drawingToUpdate);
-
-			} else {
-				// update color
-				drawingToUpdate.setColor(color);
-			}
-		} else {
-			// add new drawing
-			if (!Objects.isNull(color)) {
-				drawings.add(new DrawingDo(type, path, color));
-			}
+		String circleRegex = "^[A-Z]{1}[a-z]{1}[0-9]{1}$";
+		matcher = Pattern.compile(circleRegex).matcher(drawing);
+		if (matcher.matches()) {
+			addCircle(drawing);
 		}
+
+		String removeArrowRegex = "^[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{1}$";
+		matcher = Pattern.compile(removeArrowRegex).matcher(drawing);
+		if (matcher.matches()) {
+			removeArrow(drawing);
+		}
+
+		String removeCircleRegex = "^[a-z]{1}[0-9]{1}$";
+		matcher = Pattern.compile(removeCircleRegex).matcher(drawing);
+		if (matcher.matches()) {
+			removeCircle(drawing);
+		}
+
 	}
 
-	public void removeDrawing(DrawingDo drawing) {
-		drawings.remove(drawing);
+	private void addArrow(String arrowToAdd) {
+		String newArrows = "";
+		boolean update = false;
+		for (String arrow : this.arrows.split(",")) {
+			String trimmedArrow = arrow.trim();
+			if (trimmedArrow.length() == 5) {
+				if (arrowToAdd.substring(1, 5).equals(trimmedArrow.substring(1, 5))) {
+					update = true;
+					newArrows += ", " + arrowToAdd;
+				} else {
+					newArrows += ", " + trimmedArrow;
+				}
+			}
+		}
+
+		if (!update) {
+			newArrows += ", " + arrowToAdd;
+		}
+
+		if (newArrows.startsWith(", ")) {
+			newArrows = newArrows.substring(2, newArrows.length());
+		}
+
+		setArrows(newArrows);
+	}
+
+	private void addCircle(String circleToAdd) {
+		String newCircles = "";
+		boolean update = false;
+		for (String circle : this.circles.split(",")) {
+			String trimmedCircle = circle.trim();
+			if (trimmedCircle.length() == 3) {
+				if (circleToAdd.substring(1, 3).equals(trimmedCircle.substring(1, 3))) {
+					update = true;
+					newCircles += ", " + circleToAdd;
+				} else {
+					newCircles += ", " + trimmedCircle;
+				}
+			}
+		}
+
+		if (!update) {
+			newCircles += ", " + circleToAdd;
+		}
+
+		if (newCircles.startsWith(", ")) {
+			newCircles = newCircles.substring(2, newCircles.length());
+		}
+		setCircles(newCircles);
+	}
+
+	private void removeArrow(String arrowToRemove) {
+		String newArrows = "";
+		for (String arrow : this.arrows.split(",")) {
+			String trimmedArrow = arrow.trim();
+			if (trimmedArrow.length() == 5) {
+			if (!arrowToRemove.substring(0, 4).equals(arrow.trim().substring(1, 5))) {
+				newArrows += ", " + trimmedArrow;
+			}
+			}
+		}
+
+		if (newArrows.startsWith(", ")) {
+			newArrows = newArrows.substring(2, newArrows.length());
+		}
+
+		setArrows(newArrows);
+	}
+
+	private void removeCircle(String circleToRemove) {
+		String newCircles = "";
+		for (String circle : this.circles.split(",")) {
+			String trimmedCircle = circle.trim();
+			if (trimmedCircle.length() == 3) {
+				if (!circleToRemove.substring(0, 2).equals(trimmedCircle.substring(1, 3))) {
+					newCircles += ", " + trimmedCircle;
+				}
+			}
+		}
+
+		if (newCircles.startsWith(", ")) {
+			newCircles = newCircles.substring(2, newCircles.length());
+		}
+
+		setCircles(newCircles);
+	}
+
+	private List<String> getArrowList() {
+		List<String> arrows = new ArrayList<String>();
+		for (String arrow : this.arrows.split(",")) {
+			arrows.add(arrow.trim());
+		}
+		return arrows;
+	}
+
+	private List<String> getCircleList() {
+		List<String> circles = new ArrayList<String>();
+
+		return circles;
 	}
 
 	@Override

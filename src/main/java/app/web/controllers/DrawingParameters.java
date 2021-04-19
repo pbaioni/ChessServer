@@ -4,18 +4,12 @@ public class DrawingParameters {
 	
 	private String fen;
 	
-	private String type;
-	
-	private String path;
-	
-	private String color;
+	private String drawing;
 
-	public DrawingParameters(String fen, String type, String path, String color) {
+	public DrawingParameters(String fen, String drawing) {
 		super();
 		this.fen = fen;
-		this.type = type;
-		this.path = path;
-		this.color = color;
+		this.drawing = drawing;
 	}
 
 	public String getFen() {
@@ -26,33 +20,16 @@ public class DrawingParameters {
 		this.fen = fen;
 	}
 
-	public String getType() {
-		return type;
+	public String getDrawing() {
+		return drawing;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-	public String getColor() {
-		return color;
-	}
-
-	public void setColor(String color) {
-		this.color = color;
+	public void setDrawing(String drawing) {
+		this.drawing = drawing;
 	}
 
 	@Override
 	public String toString() {
-		return "DrawingParameters [fen=" + fen + ", type=" + type + ", path=" + path + ", color=" + color + "]";
+		return "DrawingParameters [drawing=" + drawing + "]";
 	}
-
 }

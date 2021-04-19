@@ -49,7 +49,7 @@ public class AnalysisController {
 	public void updateDrawings(@RequestBody String drawingParameters) {
 		Gson g = new Gson();
 		DrawingParameters params = g.fromJson(drawingParameters, DrawingParameters.class);
-		analysisService.updateDrawing(params.getFen(), params.getType(), params.getPath(), params.getColor());
+		analysisService.updateDrawing(params.getFen(), params.getDrawing());
 	}
 
 	@PostMapping("/delete")
