@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import app.commands.properties.CommandProperties;
 import app.main.service.AnalysisService;
-import app.stockfish.service.StockfishService;
+import app.main.service.DatabaseService;
 
 @Service
 public class CommandController implements CommandLineRunner, DisposableBean {
@@ -29,6 +29,9 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 	
 	@Autowired
 	AnalysisService analysisService;
+	
+	@Autowired
+	DatabaseService databaseService;
 
 	boolean runCommands;
 	
@@ -55,6 +58,8 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 			br = new BufferedReader(new InputStreamReader(System.in));
 			LOGGER.info("Implemented inline commands : ");
 			LOGGER.info("dropall : erase database");
+			LOGGER.info("exportdb : export database into file");
+			LOGGER.info("importdb : import database from file");
 			LOGGER.info("q : quit inline commands");
 			LOGGER.info("shutdown : stop server");
 
@@ -104,6 +109,12 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				analysisService.dropAll();
 				LOGGER.info("Database clean");
 				analysisService.init();
+				break;
+			case "importdb":
+				databaseService.importDbFromFile();
+				break;
+			case "exportdb":
+				databaseService.exportDbToFile();
 				break;
 			case "shutdown":
 				LOGGER.info("Shutting down");
