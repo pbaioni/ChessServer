@@ -327,8 +327,6 @@ public class AnalysisService {
 									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{1}$";
 									Matcher m = Pattern.compile(regex).matcher(arrow);
 									if (m.matches()) {
-										String color = getHexaColor(arrow.substring(0, 1));
-										String path = arrow.substring(1, 5);
 										updateDrawing(nextFen, arrow);
 									}
 								}
@@ -343,8 +341,6 @@ public class AnalysisService {
 									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}$";
 									Matcher m = Pattern.compile(regex).matcher(circle);
 									if (m.matches()) {
-										String color = getHexaColor(circle.substring(0, 1));
-										String path = circle.substring(1, 3);
 										updateDrawing(nextFen, circle);
 									}
 								}
