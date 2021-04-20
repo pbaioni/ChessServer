@@ -74,7 +74,7 @@ public class DatabaseService {
 		if (!exportDir.exists()) {
 			exportDir.mkdirs();
 		}
-		String DATE_FORMAT_NOW = "yyyy-MM-dd_HH:mm:ss";
+		String DATE_FORMAT_NOW = "yyyy-MM-dd_HH-mm-ss";
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
 		String exportTime = sdf.format(cal.getTime());
