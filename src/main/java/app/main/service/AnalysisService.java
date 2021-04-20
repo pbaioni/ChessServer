@@ -373,31 +373,6 @@ public class AnalysisService {
 		}
 	}
 
-	private String getHexaColor(String color) {
-
-		switch (color) {
-		case "R":
-			return "#ff0000";
-		case "G":
-			return "#00ff00";
-		case "B":
-			return "#0000ff";
-		case "Y":
-			return "#ffff00";
-		case "C":
-			return "#00ffff";
-		case "W":
-			return "#ffffff";
-		case "K":
-			return "#000000";
-		case "P":
-			return "#9900dd";
-		default:
-			return "#ffffff";
-
-		}
-
-	}
 
 	public void stopTask() {
 
