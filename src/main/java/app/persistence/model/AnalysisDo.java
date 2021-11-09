@@ -1,8 +1,6 @@
 package app.persistence.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -317,20 +315,6 @@ public class AnalysisDo {
 		}
 
 		setCircles(newCircles);
-	}
-
-	private List<String> getArrowList() {
-		List<String> arrows = new ArrayList<String>();
-		for (String arrow : this.arrows.split(",")) {
-			arrows.add(arrow.trim());
-		}
-		return arrows;
-	}
-
-	private List<String> getCircleList() {
-		List<String> circles = new ArrayList<String>();
-
-		return circles;
 	}
 
 	@Override

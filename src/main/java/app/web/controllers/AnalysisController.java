@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.Gson;
-
 import app.main.service.AnalysisService;
+import app.web.api.model.AnalysisDTO;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -26,58 +26,48 @@ public class AnalysisController {
 	private Timer shutdownTimer = new Timer();
 
 	@GetMapping
-	public String welcome() {
+	public ResponseEntity<String> welcome() {
+		
 		//cancelling shutdown task (browser refresh case)
 		shutdownTimer.cancel();
 		
-		return analysisService.welcome();
+		return ResponseEntity.ok(analysisService.welcome());
 	}
 
 	@PostMapping("/onlypawns")
-	public String getOnlyPawns(@RequestBody String fen) {
-		return analysisService.getOnlyPawnsFen(fen.replace("\"", ""));
+	public ResponseEntity<String> getOnlyPawns(@RequestBody String fen) {
+		return ResponseEntity.ok(analysisService.getOnlyPawnsFen(fen.replace("\"", "")));
 	}
 
 	@PostMapping("/analysis")
-	public String getAnalysis(@RequestBody String analysisParameters) {
-		Gson g = new Gson();
-		AnalysisParameters params = g.fromJson(analysisParameters, AnalysisParameters.class);
-		return analysisService.performAnalysis(params.getPreviousFen(), params.getMove(), params.getFen(), params.getDepth(), params.getUseEngine());
+	public ResponseEntity<AnalysisDTO> getAnalysis(@RequestBody AnalysisParameters params) {
+		return ResponseEntity.ok(analysisService.performAnalysis(params));
 	}
 	
 	@PostMapping("/drawing")
-	public void updateDrawings(@RequestBody String drawingParameters) {
-		Gson g = new Gson();
-		DrawingParameters params = g.fromJson(drawingParameters, DrawingParameters.class);
-		analysisService.updateDrawing(params.getFen(), params.getDrawing());
+	public void updateDrawings(@RequestBody DrawingParameters drawingParameters) {
+		analysisService.updateDrawing(drawingParameters);
 	}
 
 	@PostMapping("/delete")
-	public String deleteLine(@RequestBody String deleteParameters) {
-		Gson g = new Gson();
-		DeleteParameters params = g.fromJson(deleteParameters, DeleteParameters.class);
-		return analysisService.deleteLine(params.getFen(), params.getMove());
+	public ResponseEntity<String> deleteLine(@RequestBody DeleteParameters deleteParameters) {
+		return ResponseEntity.ok(analysisService.deleteLine(deleteParameters));
 	}
 
 	@PostMapping("/update")
-	public String updateDepth(@RequestBody String updateParameters) {
-		Gson g = new Gson();
-		UpdateParameters params = g.fromJson(updateParameters, UpdateParameters.class);
-		return analysisService.updateDepth(params.getFen(), Integer.parseInt(params.getDepth()), false);
+	public ResponseEntity<String>  updateDepth(@RequestBody UpdateParameters updateParameters) {
+
+		return ResponseEntity.ok(analysisService.updateDepth(updateParameters, false));
 	}
 
 	@PostMapping("/comment")
-	public String setComment(@RequestBody String commentParameters) {
-		Gson g = new Gson();
-		CommentParameters params = g.fromJson(commentParameters, CommentParameters.class);
-		return analysisService.setComment(params.getFen(), params.getComment());
+	public ResponseEntity<String>  setComment(@RequestBody CommentParameters commentParameters) {
+		return ResponseEntity.ok(analysisService.setComment(commentParameters));
 	}
 	
 	@PostMapping("/import")
-	public String importGames(@RequestBody String importParameters) throws Exception {
-		Gson g = new Gson();
-		ImportParameters params = g.fromJson(importParameters, ImportParameters.class);
-		return analysisService.fillDatabaseFromPGN(Integer.parseInt(params.getOpeningDepth()), Integer.parseInt(params.getAnalysisDepth()));
+	public ResponseEntity<String>  importGames(@RequestBody ImportParameters importParameters) throws Exception {
+		return ResponseEntity.ok(analysisService.fillDatabaseFromPGN(importParameters));
 	}
 	
 	@GetMapping("/stop")

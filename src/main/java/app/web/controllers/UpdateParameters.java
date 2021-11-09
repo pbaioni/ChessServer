@@ -4,19 +4,19 @@ public class UpdateParameters {
 	
 	private String fen;
 	
-	private String depth;
+	private Integer depth;
 
-	public UpdateParameters(String fen, String depth) {
+	public UpdateParameters(String fen, Integer depth) {
 		super();
 		this.fen = fen;
 		this.depth = depth;
 	}
 
-	public String getDepth() {
+	public Integer getDepth() {
 		return depth;
 	}
 
-	public void setDepth(String depth) {
+	public void setDepth(Integer depth) {
 		this.depth = depth;
 	}
 

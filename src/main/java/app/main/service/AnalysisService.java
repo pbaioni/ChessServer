@@ -15,10 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
-import com.google.gson.Gson;
 
 import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
@@ -27,7 +25,12 @@ import app.persistence.repo.AnalysisRepository;
 import app.stockfish.engine.EngineEvaluation;
 import app.stockfish.service.StockfishService;
 import app.web.api.model.AnalysisDTO;
-import app.web.api.model.SimpleResponseWrapper;
+import app.web.controllers.AnalysisParameters;
+import app.web.controllers.CommentParameters;
+import app.web.controllers.DeleteParameters;
+import app.web.controllers.DrawingParameters;
+import app.web.controllers.ImportParameters;
+import app.web.controllers.UpdateParameters;
 import pbaioni.chesslib.Board;
 import pbaioni.chesslib.game.Game;
 import pbaioni.chesslib.game.GamePosition;
@@ -68,15 +71,21 @@ public class AnalysisService {
 	}
 
 	public String welcome() {
-		return wrapResponse(new SimpleResponseWrapper("Board service is ready"));
+		return "Board service is ready";
 	}
 
 	public String getOnlyPawnsFen(String fen) {
 		LOGGER.debug("Cleaning pieces from fen: " + fen);
-		return wrapResponse(new SimpleResponseWrapper(FenHelper.cleanPiecesFromFen(fen)));
+		return FenHelper.cleanPiecesFromFen(fen);
 	}
 
-	public String performAnalysis(String currentFen, String move, String nextFen, Integer depth, boolean useEngine) {
+	public AnalysisDTO performAnalysis(AnalysisParameters params) {
+
+		String currentFen = params.getPreviousFen();
+		String nextFen = params.getFen();
+		String move = params.getMove();
+		int depth = params.getDepth();
+		boolean useEngine = params.getUseEngine();
 
 		// adding move to current position if needed
 		if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
@@ -117,8 +126,8 @@ public class AnalysisService {
 		board.loadFromFen(nextFen);
 		analysis.setInfluences(board.getInfluence());
 
-		Gson g = new Gson();
-		return g.toJson(analysis);
+		
+		return analysis;
 
 	}
 
@@ -141,10 +150,12 @@ public class AnalysisService {
 		return Dto;
 	}
 
-	public String deleteLine(String fen, String move) {
+	public String deleteLine(DeleteParameters params) {
 
 		String rval = "";
-
+		String fen = params.getFen();
+		String move = params.getMove();
+		
 		// removing move evaluation from variant base
 		AnalysisDo variantBase = findAnalysisInDb(FenHelper.getShortFen(fen));
 		MoveEvaluationDo moveToPrune = variantBase.getEvaluationByMove(move);
@@ -162,7 +173,7 @@ public class AnalysisService {
 		}
 
 		// returning analysis as json string
-		return wrapResponse(new SimpleResponseWrapper(rval));
+		return rval;
 
 	}
 
@@ -188,17 +199,6 @@ public class AnalysisService {
 		return analysis;
 	}
 
-	private String wrapResponse(Object response) {
-		String jsonWrapper = "";
-		try {
-			jsonWrapper = mapper.writeValueAsString(response);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		LOGGER.debug("Response wrapper: " + jsonWrapper);
-		return jsonWrapper;
-	}
-
 	public void stop() {
 		stockfishService.stop();
 	}
@@ -209,7 +209,9 @@ public class AnalysisService {
 		analysisRepository.deleteAll();
 	}
 
-	public String updateDepth(String fen, int depth, boolean forceUpdate) {
+	public String updateDepth(UpdateParameters params, boolean forceUpdate) {
+		String fen = params.getFen();
+		Integer depth = params.getDepth();
 		updates = 0;
 		Instant start = Instant.now();
 		LOGGER.info("Starting line update to depth " + depth);
@@ -228,9 +230,9 @@ public class AnalysisService {
 
 		if (stopTask) {
 			stopTask = false;
-			return wrapResponse(new SimpleResponseWrapper("Update Stopped"));
+			return "Update Stopped";
 		} else {
-			return wrapResponse(new SimpleResponseWrapper("Update completed"));
+			return "Update completed";
 		}
 	}
 
@@ -250,16 +252,16 @@ public class AnalysisService {
 
 	}
 
-	public String setComment(String fen, String comment) {
+	public String setComment(CommentParameters params) {
 
-		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
-		analysis.setComment(comment);
+		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(params.getFen()));
+		analysis.setComment(params.getComment());
 		analysisRepository.save(analysis);
 		return "Comment set!";
 
 	}
 
-	public String fillDatabaseFromPGN(int openingPlyDepth, int analysisDepth) throws Exception {
+	public String fillDatabaseFromPGN(ImportParameters params) throws Exception {
 
 		File dir = new File("./import/");
 		File[] pgnFiles = dir.listFiles(new FilenameFilter() {
@@ -293,14 +295,14 @@ public class AnalysisService {
 
 					// searching for unanalyzed moves in the opening
 					for (GamePosition pos : game.getAllPositions()) {
-						if (pos.getPly() <= openingPlyDepth && !stopTask) {
+						if (pos.getPly() <= params.getOpeningDepth() && !stopTask) {
 							String previousFen = pos.getFen();
 							board.loadFromFen(previousFen);
 							board.doMove(pos.getMove());
 							String nextFen = board.getFen();
 
 							// analyzing move
-							performAnalysis(previousFen, pos.getUciMove(), nextFen, analysisDepth, true);
+							performAnalysis(new AnalysisParameters(previousFen, pos.getUciMove(), nextFen, params.getAnalysisDepth(), true));
 
 							// Setting pgn comment
 							String pgnComment = pos.getComment();
@@ -309,11 +311,11 @@ public class AnalysisService {
 								String newComment = "";
 								if (Objects.isNull(oldComment)) {
 									newComment = "[Theory]: " + pgnComment;
-									setComment(nextFen, newComment);
+									setComment(new CommentParameters(nextFen, newComment));
 								} else {
 									if (!oldComment.contains(pgnComment)) {
 										newComment = oldComment + "\n\n[Theory]: " + pgnComment;
-										setComment(nextFen, newComment);
+										setComment(new CommentParameters(nextFen, newComment));
 									}
 								}
 
@@ -327,7 +329,7 @@ public class AnalysisService {
 									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{1}$";
 									Matcher m = Pattern.compile(regex).matcher(arrow);
 									if (m.matches()) {
-										updateDrawing(nextFen, arrow);
+										updateDrawing( new DrawingParameters(nextFen, arrow));
 									}
 								}
 
@@ -341,7 +343,7 @@ public class AnalysisService {
 									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}$";
 									Matcher m = Pattern.compile(regex).matcher(circle);
 									if (m.matches()) {
-										updateDrawing(nextFen, circle);
+										updateDrawing( new DrawingParameters(nextFen, circle));
 									}
 								}
 							}
@@ -361,7 +363,7 @@ public class AnalysisService {
 
 		if (stopTask) {
 			stopTask = false;
-			return wrapResponse(new SimpleResponseWrapper("Import Stopped"));
+			return "Import Stopped";
 		} else {
 			String rval = "";
 			if (pgnFiles.length == 0) {
@@ -369,7 +371,7 @@ public class AnalysisService {
 			} else {
 				rval = "Import completed";
 			}
-			return wrapResponse(new SimpleResponseWrapper(rval));
+			return rval;
 		}
 	}
 
@@ -381,9 +383,9 @@ public class AnalysisService {
 		stockfishService.cancel();
 	}
 
-	public void updateDrawing(String fen, String drawing) {
-		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(fen));
-		analysis.updateDrawing(drawing);
+	public void updateDrawing(DrawingParameters params) {
+		AnalysisDo analysis = findAnalysisInDb(FenHelper.getShortFen(params.getFen()));
+		analysis.updateDrawing(params.getDrawing());
 		analysisRepository.save(analysis);
 	}
 

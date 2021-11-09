@@ -2,29 +2,29 @@ package app.web.controllers;
 
 public class ImportParameters {
 	
-	private String openingDepth;
+	private Integer openingDepth;
 	
-	private String analysisDepth;
+	private Integer analysisDepth;
 
-	public ImportParameters(String openingDepth, String analysisDepth) {
+	public ImportParameters(Integer openingDepth, Integer analysisDepth) {
 		super();
 		this.openingDepth = openingDepth;
 		this.analysisDepth = analysisDepth;
 	}
 
-	public String getOpeningDepth() {
+	public Integer getOpeningDepth() {
 		return openingDepth;
 	}
 
-	public void setOpeningDepth(String openingDepth) {
+	public void setOpeningDepth(Integer openingDepth) {
 		this.openingDepth = openingDepth;
 	}
 
-	public String getAnalysisDepth() {
+	public Integer getAnalysisDepth() {
 		return analysisDepth;
 	}
 
-	public void setAnalysisDepth(String analysisDepth) {
+	public void setAnalysisDepth(Integer analysisDepth) {
 		this.analysisDepth = analysisDepth;
 	}
 
