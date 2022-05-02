@@ -126,7 +126,6 @@ public class AnalysisService {
 		board.loadFromFen(nextFen);
 		analysis.setInfluences(board.getInfluence());
 
-		
 		return analysis;
 
 	}
@@ -140,6 +139,8 @@ public class AnalysisService {
 
 		// case of best move only as a result of stockfish analysis but never browsed
 		Dto.addStockfishMove(Do.getBestMove(), Do.getEvaluation());
+		
+		Dto.calculateRandomMove();
 
 		Dto.setArrows(Do.getArrows());
 		

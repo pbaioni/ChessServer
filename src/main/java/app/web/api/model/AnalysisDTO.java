@@ -2,6 +2,7 @@ package app.web.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import pbaioni.chesslib.Square;
 import pbaioni.chesslib.move.Influence;
@@ -20,10 +21,12 @@ public class AnalysisDTO {
 
 	private List<MoveEvaluationDTO> moves = new ArrayList<MoveEvaluationDTO>();
 
+	private MoveEvaluationDTO randomMove;
+
 	private List<InfluenceDTO> influences = new ArrayList<InfluenceDTO>();
 
 	private String arrows;
-	
+
 	private String circles;
 
 	private String comment;
@@ -75,6 +78,10 @@ public class AnalysisDTO {
 		}
 	}
 
+	public MoveEvaluationDTO getRandomMove() {
+		return randomMove;
+	}
+
 	public String getArrows() {
 		return arrows;
 	}
@@ -114,6 +121,19 @@ public class AnalysisDTO {
 		}
 		calculateBestMove();
 
+	}
+
+	public void calculateRandomMove() {
+		Random rand = new Random();
+		try {
+			if (moves.size() == 1) {
+				randomMove = moves.get(0);
+			} else if(moves.size() >= 2){
+				randomMove = moves.get(rand.nextInt(0, moves.size() - 1));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private boolean isMovePresent(String move) {
@@ -158,20 +178,18 @@ public class AnalysisDTO {
 		setBestMove(bestEval.getMove());
 
 		// updating centipawn losses
-		if (false) {
-			for (MoveEvaluationDTO eval : moves) {
+		for (MoveEvaluationDTO eval : moves) {
 
-				int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation())
-						- (factor * getIntEval(eval.getEvaluation())));
-				if (centipawnLoss > 10000) {
-					centipawnLoss = 10000;
-				}
-				if (centipawnLoss < -10000) {
-					centipawnLoss = -10000;
-				}
-
-				eval.setCentipawnLoss(centipawnLoss);
+			int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation())
+					- (factor * getIntEval(eval.getEvaluation())));
+			if (centipawnLoss > 10000) {
+				centipawnLoss = 10000;
 			}
+			if (centipawnLoss < -10000) {
+				centipawnLoss = -10000;
+			}
+
+			eval.setCentipawnLoss(centipawnLoss);
 		}
 
 	}
