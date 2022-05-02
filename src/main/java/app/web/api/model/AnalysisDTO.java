@@ -124,16 +124,10 @@ public class AnalysisDTO {
 	}
 
 	public void calculateRandomMove() {
-		Random rand = new Random();
-		try {
-			if (moves.size() == 1) {
-				randomMove = moves.get(0);
-			} else if(moves.size() >= 2){
-				randomMove = moves.get(rand.nextInt(0, moves.size() - 1));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
+		int randomIndex = (int) ((Math.random() * (moves.size() - 0)) + 0);
+		randomMove = moves.get(randomIndex);
+
 	}
 
 	private boolean isMovePresent(String move) {
