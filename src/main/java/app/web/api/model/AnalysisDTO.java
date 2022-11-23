@@ -16,6 +16,8 @@ public class AnalysisDTO {
 	private String evaluation;
 
 	private String bestMove;
+	
+	private String centipawnLoss;
 
 	private int depth;
 
@@ -58,6 +60,14 @@ public class AnalysisDTO {
 	public void setBestMove(String bestMove) {
 		this.bestMove = bestMove;
 	}
+	
+	public String getCentipawnLoss() {
+		return centipawnLoss;
+	}
+
+	public void setCentipawnLoss(String centipawnLoss) {
+		this.centipawnLoss = centipawnLoss;
+	}
 
 	public int getDepth() {
 		return depth;
@@ -69,6 +79,15 @@ public class AnalysisDTO {
 
 	public List<MoveEvaluationDTO> getMoves() {
 		return moves;
+	}
+	
+	public MoveEvaluationDTO getMove(String move) {
+		for(MoveEvaluationDTO m : this.moves) {
+			if(m.getMove().equals(move)) {
+				return m;
+			}
+		}
+		return null;
 	}
 
 	public void setInfluences(Influence influence) {
