@@ -86,15 +86,18 @@ public class AnalysisService {
 		String move = params.getMove();
 		int depth = params.getDepth();
 		boolean useEngine = params.getUseEngine();
+		AnalysisDo currentPosition = null;
+		AnalysisDo nextPosition = null;
+		int loss;
 
 		// adding move to current position if needed
 		if (!Objects.isNull(currentFen) && !Objects.isNull(move)) {
-			AnalysisDo currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
+			currentPosition = findAnalysisInDb(FenHelper.getShortFen(currentFen));
 			MoveEvaluationDo newMove = new MoveEvaluationDo(move, nextFen);
 			if (!Objects.isNull(currentPosition)) {
 				LOGGER.debug("CurrentFetched: " + currentPosition.toString());
 				if (currentPosition.addMove(newMove)) {
-					LOGGER.debug("Current with move added: " + currentPosition.toString());
+					LOGGER.debug("Current move added: " + currentPosition.toString());
 					analysisRepository.save(currentPosition);
 					LOGGER.info("Move " + move + " added to current position");
 				}
@@ -102,7 +105,7 @@ public class AnalysisService {
 		}
 
 		// analysing new position if needed
-		AnalysisDo nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
+		nextPosition = findAnalysisInDb(FenHelper.getShortFen(nextFen));
 		if (!Objects.isNull(nextPosition) && depth <= nextPosition.getDepth()) {
 			// position found in DB
 			LOGGER.debug("Analysis fetched: " + nextPosition.toString());
@@ -122,11 +125,15 @@ public class AnalysisService {
 
 		// creating DTO object to return
 		AnalysisDTO analysis = mapToDto(nextPosition);
+		if (Objects.nonNull(currentPosition) && Objects.nonNull(move)) {
+			AnalysisDTO prevAnalysis = mapToDto(currentPosition);
+			analysis.setCentipawnLoss(String.valueOf(prevAnalysis.getMove(move).getCentipawnLoss()));
+		}
+
 		Board board = new Board();
 		board.loadFromFen(nextFen);
 		analysis.setInfluences(board.getInfluence());
 
-		
 		return analysis;
 
 	}
@@ -141,8 +148,10 @@ public class AnalysisService {
 		// case of best move only as a result of stockfish analysis but never browsed
 		Dto.addStockfishMove(Do.getBestMove(), Do.getEvaluation());
 
+		Dto.calculateRandomMove();
+
 		Dto.setArrows(Do.getArrows());
-		
+
 		Dto.setCircles(Do.getCircles());
 
 		LOGGER.debug("DTO: " + Dto.toString());
@@ -155,7 +164,7 @@ public class AnalysisService {
 		String rval = "";
 		String fen = params.getFen();
 		String move = params.getMove();
-		
+
 		// removing move evaluation from variant base
 		AnalysisDo variantBase = findAnalysisInDb(FenHelper.getShortFen(fen));
 		MoveEvaluationDo moveToPrune = variantBase.getEvaluationByMove(move);
@@ -302,7 +311,8 @@ public class AnalysisService {
 							String nextFen = board.getFen();
 
 							// analyzing move
-							performAnalysis(new AnalysisParameters(previousFen, pos.getUciMove(), nextFen, params.getAnalysisDepth(), true));
+							performAnalysis(new AnalysisParameters(previousFen, pos.getUciMove(), nextFen,
+									params.getAnalysisDepth(), true));
 
 							// Setting pgn comment
 							String pgnComment = pos.getComment();
@@ -329,7 +339,7 @@ public class AnalysisService {
 									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}[a-z]{1}[0-9]{1}$";
 									Matcher m = Pattern.compile(regex).matcher(arrow);
 									if (m.matches()) {
-										updateDrawing( new DrawingParameters(nextFen, arrow));
+										updateDrawing(new DrawingParameters(nextFen, arrow));
 									}
 								}
 
@@ -343,7 +353,7 @@ public class AnalysisService {
 									String regex = "^[A-Z]{1}[a-z]{1}[0-9]{1}$";
 									Matcher m = Pattern.compile(regex).matcher(circle);
 									if (m.matches()) {
-										updateDrawing( new DrawingParameters(nextFen, circle));
+										updateDrawing(new DrawingParameters(nextFen, circle));
 									}
 								}
 							}
@@ -374,7 +384,6 @@ public class AnalysisService {
 			return rval;
 		}
 	}
-
 
 	public void stopTask() {
 

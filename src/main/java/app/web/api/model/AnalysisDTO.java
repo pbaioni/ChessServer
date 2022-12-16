@@ -2,6 +2,7 @@ package app.web.api.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import pbaioni.chesslib.Square;
 import pbaioni.chesslib.move.Influence;
@@ -15,15 +16,19 @@ public class AnalysisDTO {
 	private String evaluation;
 
 	private String bestMove;
+	
+	private String centipawnLoss;
 
 	private int depth;
 
 	private List<MoveEvaluationDTO> moves = new ArrayList<MoveEvaluationDTO>();
 
+	private MoveEvaluationDTO randomMove;
+
 	private List<InfluenceDTO> influences = new ArrayList<InfluenceDTO>();
 
 	private String arrows;
-	
+
 	private String circles;
 
 	private String comment;
@@ -55,6 +60,14 @@ public class AnalysisDTO {
 	public void setBestMove(String bestMove) {
 		this.bestMove = bestMove;
 	}
+	
+	public String getCentipawnLoss() {
+		return centipawnLoss;
+	}
+
+	public void setCentipawnLoss(String centipawnLoss) {
+		this.centipawnLoss = centipawnLoss;
+	}
 
 	public int getDepth() {
 		return depth;
@@ -67,12 +80,25 @@ public class AnalysisDTO {
 	public List<MoveEvaluationDTO> getMoves() {
 		return moves;
 	}
+	
+	public MoveEvaluationDTO getMove(String move) {
+		for(MoveEvaluationDTO m : this.moves) {
+			if(m.getMove().equals(move)) {
+				return m;
+			}
+		}
+		return null;
+	}
 
 	public void setInfluences(Influence influence) {
 		for (Square square : influence.getInfluence().keySet()) {
 			this.influences.add(new InfluenceDTO(square.name().toLowerCase(),
 					Integer.toString(influence.getInfluence().get(square))));
 		}
+	}
+
+	public MoveEvaluationDTO getRandomMove() {
+		return randomMove;
 	}
 
 	public String getArrows() {
@@ -113,6 +139,13 @@ public class AnalysisDTO {
 			moves.add(new MoveEvaluationDTO(bestMove, mapMoveEvalToPositionEval(evaluation, true)));
 		}
 		calculateBestMove();
+
+	}
+
+	public void calculateRandomMove() {
+
+		int randomIndex = (int) ((Math.random() * (moves.size() - 0)) + 0);
+		randomMove = moves.get(randomIndex);
 
 	}
 
@@ -158,20 +191,18 @@ public class AnalysisDTO {
 		setBestMove(bestEval.getMove());
 
 		// updating centipawn losses
-		if (false) {
-			for (MoveEvaluationDTO eval : moves) {
+		for (MoveEvaluationDTO eval : moves) {
 
-				int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation())
-						- (factor * getIntEval(eval.getEvaluation())));
-				if (centipawnLoss > 10000) {
-					centipawnLoss = 10000;
-				}
-				if (centipawnLoss < -10000) {
-					centipawnLoss = -10000;
-				}
-
-				eval.setCentipawnLoss(centipawnLoss);
+			int centipawnLoss = (factor * getIntEval(bestEval.getEvaluation())
+					- (factor * getIntEval(eval.getEvaluation())));
+			if (centipawnLoss > 10000) {
+				centipawnLoss = 10000;
 			}
+			if (centipawnLoss < -10000) {
+				centipawnLoss = -10000;
+			}
+
+			eval.setCentipawnLoss(centipawnLoss);
 		}
 
 	}
