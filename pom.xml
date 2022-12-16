@@ -89,6 +89,13 @@
 			<artifactId>chesslib</artifactId>
 			<version>1.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>pbaioni</groupId>
+			<artifactId>stockfish4j</artifactId>
+			<version>1.0</version>
+		</dependency>
+
 
 		<!-- test -->
 		<dependency>
