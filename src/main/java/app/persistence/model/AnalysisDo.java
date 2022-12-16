@@ -18,7 +18,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import app.main.service.helper.FenHelper;
-import app.stockfish.engine.EngineEvaluation;
+import stockfish4j.model.EngineEvaluation;
+
 
 @Entity
 @Table(name = "analysis")
@@ -187,17 +188,11 @@ public class AnalysisDo {
 	}
 
 	public void setEngineEvaluation(EngineEvaluation eval) {
-		if (!eval.isCanceled()) {
-			this.setBestMove(eval.getBestMove());
-			this.setEvaluation(eval.getEvaluation());
+
+			this.setBestMove(eval.getBestmove());
+			this.setEvaluation(String.valueOf(eval.getEvaluation()));
 			this.setDepth(eval.getDepth());
-		} else {
-			if (Objects.isNull(bestMove)) {
-				this.setBestMove(eval.getBestMove());
-				this.setEvaluation(eval.getEvaluation());
-				this.setDepth(0);
-			}
-		}
+
 	}
 
 	public void updateDrawing(String drawing) {

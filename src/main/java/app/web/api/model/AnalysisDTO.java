@@ -243,7 +243,7 @@ public class AnalysisDTO {
 				intEval = intEval * (-1);
 			}
 		} else {
-			intEval = Integer.parseInt(evaluation);
+			intEval = Integer.parseInt(evaluation.replace(".",""))*100;
 		}
 
 		return intEval;

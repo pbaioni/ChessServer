@@ -2,6 +2,7 @@ package app.web.controllers;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class AnalysisController {
 	}
 
 	@PostMapping("/analysis")
-	public ResponseEntity<AnalysisDTO> getAnalysis(@RequestBody AnalysisParameters params) {
+	public ResponseEntity<AnalysisDTO> getAnalysis(@RequestBody AnalysisParameters params) throws InterruptedException, ExecutionException {
 		return ResponseEntity.ok(analysisService.performAnalysis(params));
 	}
 	
@@ -55,7 +56,7 @@ public class AnalysisController {
 	}
 
 	@PostMapping("/update")
-	public ResponseEntity<String>  updateDepth(@RequestBody UpdateParameters updateParameters) {
+	public ResponseEntity<String>  updateDepth(@RequestBody UpdateParameters updateParameters) throws InterruptedException, ExecutionException {
 
 		return ResponseEntity.ok(analysisService.updateDepth(updateParameters, false));
 	}

@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +23,6 @@ import app.main.service.helper.FenHelper;
 import app.persistence.model.AnalysisDo;
 import app.persistence.model.MoveEvaluationDo;
 import app.persistence.repo.AnalysisRepository;
-import app.stockfish.engine.EngineEvaluation;
-import app.stockfish.service.StockfishService;
 import app.web.api.model.AnalysisDTO;
 import app.web.controllers.AnalysisParameters;
 import app.web.controllers.CommentParameters;
@@ -35,6 +34,9 @@ import pbaioni.chesslib.Board;
 import pbaioni.chesslib.game.Game;
 import pbaioni.chesslib.game.GamePosition;
 import pbaioni.chesslib.pgn.PgnHolder;
+import stockfish4j.model.EngineEvaluation;
+import stockfish4j.service.StockfishService;
+import stockfish4j.service.Stockfish4jProperties;
 
 @Service
 public class AnalysisService {
@@ -44,8 +46,7 @@ public class AnalysisService {
 	@Autowired
 	AnalysisRepository analysisRepository;
 
-	@Autowired
-	StockfishService stockfishService;
+	StockfishService stockfishService = new StockfishService(new Stockfish4jProperties());
 
 	@Autowired
 	ObjectMapper mapper;
@@ -57,7 +58,7 @@ public class AnalysisService {
 	private boolean stopTask = false;
 
 	public void init() {
-		stockfishService.init();
+		//stockfishService.init();
 
 		// empty database, setting start position
 		if (analysisRepository.count() == 0L) {
@@ -79,7 +80,7 @@ public class AnalysisService {
 		return FenHelper.cleanPiecesFromFen(fen);
 	}
 
-	public AnalysisDTO performAnalysis(AnalysisParameters params) {
+	public AnalysisDTO performAnalysis(AnalysisParameters params) throws InterruptedException, ExecutionException {
 
 		String currentFen = params.getPreviousFen();
 		String nextFen = params.getFen();
@@ -116,7 +117,7 @@ public class AnalysisService {
 			}
 			if (useEngine) {
 				LOGGER.info("No result from database, performing analysis for fen: " + nextFen);
-				EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(nextFen, depth);
+				EngineEvaluation engineEvaluation = stockfishService.submitDepthTask(nextFen, depth).get();
 				nextPosition.setEngineEvaluation(engineEvaluation);
 			}
 			analysisRepository.save(nextPosition);
@@ -208,8 +209,8 @@ public class AnalysisService {
 		return analysis;
 	}
 
-	public void stop() {
-		stockfishService.stop();
+	public void stop() throws InterruptedException {
+		stockfishService.cancelAll();;
 	}
 
 	// methods for command controller
@@ -218,7 +219,7 @@ public class AnalysisService {
 		analysisRepository.deleteAll();
 	}
 
-	public String updateDepth(UpdateParameters params, boolean forceUpdate) {
+	public String updateDepth(UpdateParameters params, boolean forceUpdate) throws InterruptedException, ExecutionException {
 		String fen = params.getFen();
 		Integer depth = params.getDepth();
 		updates = 0;
@@ -245,11 +246,11 @@ public class AnalysisService {
 		}
 	}
 
-	private void updatePositionDepth(AnalysisDo position, int depth, boolean forceUpdate) {
+	private void updatePositionDepth(AnalysisDo position, int depth, boolean forceUpdate) throws InterruptedException, ExecutionException {
 
 		if (!stopTask) {
 			if (position.getDepth() < depth || forceUpdate) {
-				EngineEvaluation engineEvaluation = stockfishService.getEngineEvaluation(position.getFen(), depth);
+				EngineEvaluation engineEvaluation = stockfishService.submitDepthTask(position.getFen(), depth).get();
 				position.setEngineEvaluation(engineEvaluation);
 				analysisRepository.save(position);
 				updates++;
@@ -385,11 +386,11 @@ public class AnalysisService {
 		}
 	}
 
-	public void stopTask() {
+	public void stopTask() throws InterruptedException {
 
 		LOGGER.info("Stopping task");
 		this.stopTask = true;
-		stockfishService.cancel();
+		stockfishService.cancelAll();
 	}
 
 	public void updateDrawing(DrawingParameters params) {

@@ -38,7 +38,7 @@ public class Application implements ApplicationRunner, DisposableBean{
 		
 	}
 	
-	public void stop() {
+	public void stop() throws InterruptedException {
 		LOGGER.info("Stopping Application");
 		analysisService.stop();
 		LOGGER.info("Application stopped");
