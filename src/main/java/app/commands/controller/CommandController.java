@@ -26,15 +26,15 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 
 	@Autowired
 	CommandProperties properties;
-	
+
 	@Autowired
 	AnalysisService analysisService;
-	
+
 	@Autowired
 	DatabaseService databaseService;
 
 	boolean runCommands;
-	
+
 	private static final String DELIMITER = " ";
 
 	public CommandController() {
@@ -61,7 +61,6 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 			LOGGER.info("exportdb : export database into file");
 			LOGGER.info("importdb : import database from file");
 			LOGGER.info("q : quit inline commands");
-			LOGGER.info("shutdown : stop server");
 
 			runCommands = true;
 			while (runCommands) {
@@ -115,10 +114,6 @@ public class CommandController implements CommandLineRunner, DisposableBean {
 				break;
 			case "exportdb":
 				databaseService.exportDbToFile();
-				break;
-			case "shutdown":
-				LOGGER.info("Shutting down");
-				analysisService.shutdown();
 				break;
 			default:
 				LOGGER.error("Unknown command [" + command + " " + arguments.toString() + "]");

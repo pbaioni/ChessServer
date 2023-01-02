@@ -133,7 +133,6 @@ public class AnalysisService {
 
 		Board board = new Board();
 		board.loadFromFen(nextFen);
-		analysis.setInfluences(board.getInfluence());
 
 		return analysis;
 

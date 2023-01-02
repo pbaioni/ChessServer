@@ -29,9 +29,6 @@ public class AnalysisController {
 	@GetMapping
 	public ResponseEntity<String> welcome() {
 		
-		//cancelling shutdown task (browser refresh case)
-		shutdownTimer.cancel();
-		
 		return ResponseEntity.ok(analysisService.welcome());
 	}
 
@@ -76,19 +73,4 @@ public class AnalysisController {
 		analysisService.stopTask();
 	}
 
-	@GetMapping("/shutdown")
-	public void shutdown() throws Exception {
-		
-		shutdownTimer = new Timer();
-		
-	    TimerTask task = new TimerTask() {
-	        public void run() {
-	        	System.exit(0);
-	        }
-	    };
-	    
-	    //setting a 3 seconds delay for shutdown in order to manage browser page refresh
-	    long delay = 3000L;
-	    shutdownTimer.schedule(task, delay);
-	}
 }

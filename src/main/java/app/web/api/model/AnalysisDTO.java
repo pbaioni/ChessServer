@@ -25,8 +25,6 @@ public class AnalysisDTO {
 
 	private MoveEvaluationDTO randomMove;
 
-	private List<InfluenceDTO> influences = new ArrayList<InfluenceDTO>();
-
 	private String arrows;
 
 	private String circles;
@@ -90,12 +88,6 @@ public class AnalysisDTO {
 		return null;
 	}
 
-	public void setInfluences(Influence influence) {
-		for (Square square : influence.getInfluence().keySet()) {
-			this.influences.add(new InfluenceDTO(square.name().toLowerCase(),
-					Integer.toString(influence.getInfluence().get(square))));
-		}
-	}
 
 	public MoveEvaluationDTO getRandomMove() {
 		return randomMove;
@@ -252,7 +244,7 @@ public class AnalysisDTO {
 	@Override
 	public String toString() {
 		return "AnalysisDTO [fen=" + fen + ", turn=" + turn + ", evaluation=" + evaluation + ", bestMove=" + bestMove
-				+ ", depth=" + depth + ", moves=" + moves + ", influences=" + influences + ", arrows=" + arrows
+				+ ", depth=" + depth + ", moves=" + moves + ", arrows=" + arrows
 				+ ", circles=" + circles + ", comment=" + comment + "]";
 	}
 }
